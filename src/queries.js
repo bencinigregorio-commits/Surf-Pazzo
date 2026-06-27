@@ -74,6 +74,22 @@ export async function saveSession(payload) {
   return dayLog
 }
 
+// Configurazione viaggio (modalità pre-trip).
+export async function getTripConfig() {
+  const { data, error } = await supabase
+    .from('trip_config')
+    .select('trip_date')
+    .eq('id', 1)
+    .maybeSingle()
+  if (error) throwIfMissingTables(error)
+  return data ?? null
+}
+
+export async function setTripDate(date) {
+  const { error } = await supabase.from('trip_config').upsert({ id: 1, trip_date: date })
+  if (error) throwIfMissingTables(error)
+}
+
 // Check-in soggettivo di fatica.
 export async function saveCheckin(state) {
   const { error } = await supabase.from('week_checkin').insert({ state })

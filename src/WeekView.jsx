@@ -23,6 +23,7 @@ const CHECKINS = [
 
 export default function WeekView({
   weekLogs, days, fatigue, deload, checkin, activeRegions,
+  tripDate, tripPhase, onSetTripDate,
   onOpenSessionLog, onQuickLog, onCheckin,
 }) {
   const todayIso = isoDate(new Date())
@@ -39,6 +40,7 @@ export default function WeekView({
     <div>
       <h1 className="session-title">La tua settimana</h1>
 
+      <TripCard tripDate={tripDate} phase={tripPhase} onSetDate={onSetTripDate} />
       <FasceCard status={status} />
       <ProposteCard plan={plan} onOpenSessionLog={onOpenSessionLog} onQuickLog={onQuickLog} />
       <FatigueCard fatigue={fatigue} deload={deload} checkin={checkin} activeRegions={activeRegions} onCheckin={onCheckin} />
@@ -113,6 +115,59 @@ export default function WeekView({
         )}
       </section>
     </div>
+  )
+}
+
+function formatItDate(iso) {
+  if (!iso) return ''
+  return new Date(iso + 'T00:00:00').toLocaleDateString('it-IT', {
+    day: '2-digit', month: 'long', year: 'numeric',
+  })
+}
+
+// Modalità pre-trip: imposta la data del viaggio e mostra la fase quando è vicino.
+function TripCard({ tripDate, phase, onSetDate }) {
+  if (phase.active) {
+    return (
+      <div className="trip trip--on">
+        <div className="trip-head">
+          <span className="trip-title">🏝️ Pre-trip · {phase.label}</span>
+          <button className="link small" onClick={() => onSetDate(null)}>rimuovi</button>
+        </div>
+        <p className="trip-focus">{phase.focus}</p>
+        <p className="trip-emph">
+          Priorità: pagaiata (B/ski-erg), pop-up, balance. Alleggerisci la forza pesante (A).
+          In giallo: niente nuovi carichi.
+        </p>
+        {phase.deload && (
+          <p className="trip-deload">💡 Settimana di scarico: tanta mobilità/pop-up/balance, arriva riposato.</p>
+        )}
+        <p className="muted small">
+          Mancano {phase.days} {phase.days === 1 ? 'giorno' : 'giorni'} (il {formatItDate(tripDate)}).
+        </p>
+      </div>
+    )
+  }
+  return (
+    <details className="trip">
+      <summary>🏝️ Viaggio surf in vista? Imposta la data</summary>
+      <div className="trip-set">
+        <input
+          type="date"
+          className="input"
+          value={tripDate ?? ''}
+          onChange={(e) => onSetDate(e.target.value || null)}
+        />
+        {tripDate && <button className="link small" onClick={() => onSetDate(null)}>rimuovi</button>}
+      </div>
+      {tripDate ? (
+        <p className="muted small">
+          Viaggio il {formatItDate(tripDate)}. Il regime pre-trip parte a 4 settimane dal viaggio.
+        </p>
+      ) : (
+        <p className="muted small">A 4 settimane dal viaggio l'app cambia priorità per arrivare al top.</p>
+      )}
+    </details>
   )
 }
 

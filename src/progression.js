@@ -45,9 +45,17 @@ function consecutiveGoodQuality(history) {
 // settimanale { weekFatigue: 'verde'|'giallo'|'rosso', activeRegions: [{region,severity}] }.
 export function computeSuggestion(exercise, history, todayIso, ctx = {}) {
   const base = baseSuggestion(exercise, history, todayIso, ctx)
-  // Freno settimana "rossa": tetto a MANTIENI anche con buoni numeri.
-  if (base.code === 'PROGREDISCI' && ctx.weekFatigue === 'rosso') {
-    return { ...base, code: 'MANTIENI', hint: 'Settimana "rossa": tetto a mantieni (priorità recupero).' }
+  // Freno fatica: settimana "rossa" sempre; in pre-trip basta il "giallo".
+  const capByFatigue =
+    ctx.weekFatigue === 'rosso' || (ctx.preTrip && ctx.weekFatigue === 'giallo')
+  if (base.code === 'PROGREDISCI' && capByFatigue) {
+    return {
+      ...base,
+      code: 'MANTIENI',
+      hint: ctx.preTrip
+        ? 'Pre-trip: in giallo si mantiene (arrivare freschi viene prima).'
+        : 'Settimana "rossa": tetto a mantieni (priorità recupero).',
+    }
   }
   return base
 }

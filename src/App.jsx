@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   getBackboneSessions, getProgressionData, getWeekLogs, getLatestCheckin,
-  saveSession, saveCheckin,
+  getTripConfig, setTripDate, saveSession, saveCheckin,
 } from './queries'
 import { computeSuggestion, lastLogSummary, SUGGEST_META } from './progression'
 import { computeWeeklyLoad, fatigueState, deloadAdvice, computeActivePain } from './recovery'
+import { computeTripPhase } from './trip'
 import { isoDate, weekRange } from './week'
 import LogForm from './LogForm'
 import WeekView from './WeekView'
@@ -29,6 +30,7 @@ export default function App() {
   const [progByEx, setProgByEx] = useState({})
   const [weekLogs, setWeekLogs] = useState([])
   const [checkin, setCheckin] = useState(null)
+  const [tripDate, setTripDateState] = useState(null)
 
   const days = weekRange().days
 
@@ -55,6 +57,7 @@ export default function App() {
     getProgressionData().then(setProgByEx).catch(() => setProgByEx({}))
     getWeekLogs(isoDate(days[0]), isoDate(days[6])).then(setWeekLogs).catch(() => setWeekLogs([]))
     getLatestCheckin().then(setCheckin).catch(() => setCheckin(null))
+    getTripConfig().then((t) => setTripDateState(t?.trip_date ?? null)).catch(() => setTripDateState(null))
   }
 
   // Indice esercizi (per le zone del corpo) e stato derivato di fatica/dolore.
@@ -67,7 +70,8 @@ export default function App() {
   const activeRegions = useMemo(() => computeActivePain(progByEx, exById), [progByEx, exById])
   const fatigue = useMemo(() => fatigueState(computeWeeklyLoad(weekLogs), checkin?.state), [weekLogs, checkin])
   const deload = deloadAdvice(fatigue.state, checkin?.state, activeRegions)
-  const suggestCtx = { weekFatigue: fatigue.state, activeRegions }
+  const tripPhase = useMemo(() => computeTripPhase(tripDate, TODAY_ISO), [tripDate])
+  const suggestCtx = { weekFatigue: fatigue.state, activeRegions, preTrip: tripPhase.active }
 
   const current = sessions.find((s) => s.code === active)
 
@@ -108,6 +112,16 @@ export default function App() {
       await saveCheckin(s)
       refreshData()
       showToast('Sensazione registrata ✓')
+    } catch (e) {
+      showToast('Errore: ' + (e.message ?? e))
+    }
+  }
+
+  async function changeTripDate(date) {
+    try {
+      await setTripDate(date)
+      refreshData()
+      showToast(date ? 'Viaggio impostato ✓' : 'Viaggio rimosso')
     } catch (e) {
       showToast('Errore: ' + (e.message ?? e))
     }
@@ -161,6 +175,9 @@ export default function App() {
             deload={deload}
             checkin={checkin}
             activeRegions={activeRegions}
+            tripDate={tripDate}
+            tripPhase={tripPhase}
+            onSetTripDate={changeTripDate}
             onOpenSessionLog={openSessionLog}
             onQuickLog={quickLog}
             onCheckin={doCheckin}
