@@ -41,13 +41,33 @@ function consecutiveGoodQuality(history) {
 }
 
 // Consiglio per la volta successiva. `exercise` = riga libreria, `history` = log
-// dell'esercizio dal più recente, `todayIso` = data odierna.
-export function computeSuggestion(exercise, history, todayIso) {
+// dell'esercizio dal più recente, `todayIso` = data odierna, `ctx` = contesto
+// settimanale { weekFatigue: 'verde'|'giallo'|'rosso', activeRegions: [{region,severity}] }.
+export function computeSuggestion(exercise, history, todayIso, ctx = {}) {
+  const base = baseSuggestion(exercise, history, todayIso, ctx)
+  // Freno settimana "rossa": tetto a MANTIENI anche con buoni numeri.
+  if (base.code === 'PROGREDISCI' && ctx.weekFatigue === 'rosso') {
+    return { ...base, code: 'MANTIENI', hint: 'Settimana "rossa": tetto a mantieni (priorità recupero).' }
+  }
+  return base
+}
+
+function baseSuggestion(exercise, history, todayIso, ctx) {
+  const last = history && history.length ? history[0] : null
+
+  // Zona in dolore attivo (anche per colpa di un altro esercizio): si declassa.
+  const exRegions = exercise.body_regions ?? []
+  const hit = (ctx.activeRegions ?? []).find((r) => exRegions.includes(r.region))
+  if (hit) {
+    return hit.severity >= 2
+      ? { code: 'REGREDISCI', hint: `Zona ${hit.region} in dolore: usa l'alternativa prudente/riabilitativa.`, last }
+      : { code: 'RIDUCI', hint: `Zona ${hit.region} sensibile: tieni leggero, valuta l'alternativa.`, last }
+  }
+
   if (!history || history.length === 0) {
     return { code: 'NUOVO', hint: 'Registra una volta e qui comparirà il consiglio.', last: null }
   }
 
-  const last = history[0]
   const painSev = last.pain_severity ?? 0
 
   // 1) Dolore sulla regione coinvolta: prudenza, sempre.

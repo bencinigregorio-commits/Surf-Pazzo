@@ -1,14 +1,11 @@
-import { useEffect, useState } from 'react'
-import { getWeekLogs, saveSession } from './queries'
 import {
   isoDate, weekRange, WEEKDAYS, activityLabel, activityShort,
   computeWeekStatus, TIERS, buildPlan, CODE_LABEL,
 } from './week'
+import { FATIGUE_META } from './recovery'
 
-// Icona-fantasma per un'attività solo proposta (non ancora fatta).
 const PLAN_SHORT = { A: 'A', B: 'B', C: 'C', cardio: '🏃', free: '·', mobility: '🧘' }
 
-// Attività che si registrano con un tocco (le palestre A/B/C aprono invece il modulo).
 const QUICK = [
   { code: 'corsa', label: '🏃 Corsa' },
   { code: 'calcetto', label: '⚽ Calcetto' },
@@ -18,60 +15,33 @@ const QUICK = [
   { code: '__rest__', label: '😴 Riposo' },
 ]
 
-export default function WeekView({ onOpenSessionLog, onToast }) {
-  const { days } = weekRange()
+const CHECKINS = [
+  { state: 'fresco', label: '😀 Fresco' },
+  { state: 'ok', label: '🙂 Ok' },
+  { state: 'cotto', label: '🥵 Cotto' },
+]
+
+export default function WeekView({
+  weekLogs, days, fatigue, deload, checkin, activeRegions,
+  onOpenSessionLog, onQuickLog, onCheckin,
+}) {
   const todayIso = isoDate(new Date())
-  const [logs, setLogs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
 
-  async function load() {
-    setLoading(true)
-    try {
-      const data = await getWeekLogs(isoDate(days[0]), isoDate(days[6]))
-      setLogs(data)
-    } catch {
-      setLogs([])
-    }
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Raggruppa le attività per data.
   const byDate = {}
-  for (const l of logs) (byDate[l.log_date] ??= []).push(l)
+  for (const l of weekLogs) (byDate[l.log_date] ??= []).push(l)
 
-  async function quickLog(code) {
-    setSaving(true)
-    try {
-      await saveSession({
-        session_code: code === '__rest__' ? null : code,
-        status: code === '__rest__' ? 'rest' : 'done',
-        log_date: todayIso,
-      })
-      await load()
-      onToast?.('Segnato per oggi ✓')
-    } catch (e) {
-      onToast?.('Errore: ' + (e.message ?? e))
-    }
-    setSaving(false)
-  }
-
-  const todayLogs = byDate[todayIso] ?? []
-  const status = computeWeekStatus(logs)
-  const plan = buildPlan(logs, days, todayIso)
+  const status = computeWeekStatus(weekLogs)
+  const plan = buildPlan(weekLogs, days, todayIso)
   const planByIso = Object.fromEntries(plan.perDay.map((p) => [p.iso, p]))
+  const todayLogs = byDate[todayIso] ?? []
 
   return (
     <div>
       <h1 className="session-title">La tua settimana</h1>
 
-      {!loading && <FasceCard status={status} />}
-      {!loading && <ProposteCard plan={plan} onOpenSessionLog={onOpenSessionLog} onQuickLog={quickLog} />}
+      <FasceCard status={status} />
+      <ProposteCard plan={plan} onOpenSessionLog={onOpenSessionLog} onQuickLog={onQuickLog} />
+      <FatigueCard fatigue={fatigue} deload={deload} checkin={checkin} activeRegions={activeRegions} onCheckin={onCheckin} />
 
       {/* Striscia Lun–Dom */}
       <div className="weekstrip">
@@ -113,7 +83,7 @@ export default function WeekView({ onOpenSessionLog, onToast }) {
         </div>
         <div className="declare-row">
           {QUICK.map((q) => (
-            <button key={q.code} className="dbtn" disabled={saving} onClick={() => quickLog(q.code)}>
+            <button key={q.code} className="dbtn" onClick={() => onQuickLog(q.code)}>
               {q.label}
             </button>
           ))}
@@ -126,9 +96,7 @@ export default function WeekView({ onOpenSessionLog, onToast }) {
       {/* Riepilogo di oggi */}
       <section className="today">
         <h2 className="h2">Oggi</h2>
-        {loading ? (
-          <p className="muted small">Carico…</p>
-        ) : todayLogs.length === 0 ? (
+        {todayLogs.length === 0 ? (
           <p className="muted small">Niente di registrato oggi. Scegli qui sopra.</p>
         ) : (
           <ul className="loglist">
@@ -148,12 +116,52 @@ export default function WeekView({ onOpenSessionLog, onToast }) {
   )
 }
 
+// Stato di fatica + check-in soggettivo + avvisi (zone in dolore, scarico).
+function FatigueCard({ fatigue, deload, checkin, activeRegions, onCheckin }) {
+  const meta = FATIGUE_META[fatigue.state]
+  return (
+    <div className={'fatigue ' + meta.cls}>
+      <div className="fatigue-head">
+        <div>
+          <span className="fasce-label">Fatica settimana</span>
+          <div className="fatigue-state">
+            <span className="fatigue-dot" /> {meta.label}
+          </div>
+        </div>
+        <span className="fatigue-load">carico {fatigue.load}</span>
+      </div>
+      <p className="fatigue-sub">{meta.sub}</p>
+
+      <div className="checkin">
+        <span className="muted small">Come ti senti oggi?</span>
+        <div className="checkin-row">
+          {CHECKINS.map((c) => (
+            <button
+              key={c.state}
+              className={'cbtn' + (checkin?.state === c.state ? ' cbtn--on' : '')}
+              onClick={() => onCheckin(c.state)}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {activeRegions.length > 0 && (
+        <p className="fatigue-pain">
+          ⚠️ Zona in attenzione: {activeRegions.map((r) => `${r.region}${r.severity >= 2 ? ' (forte)' : ''}`).join(', ')}.
+        </p>
+      )}
+      {deload && <p className="fatigue-deload">💡 {deload}</p>}
+    </div>
+  )
+}
+
 // Proposta del giorno + piano dei prossimi giorni (motore 3c).
 function ProposteCard({ plan, onOpenSessionLog, onQuickLog }) {
   const { today, dropped, missing, perDay } = plan
   const code = today.code
 
-  // Testo della proposta di oggi.
   let title, reason, action = null
   if (today.state === 'done') {
     title = `Oggi: ${CODE_LABEL[code] ?? code} ✓`
@@ -183,7 +191,6 @@ function ProposteCard({ plan, onOpenSessionLog, onQuickLog }) {
     reason = 'Mobilità o balance se ti va, poi riposa.'
   }
 
-  // Piano dei prossimi giorni (futuri, oggi escluso).
   const futuro = perDay.filter((p) => !p.isPast && !p.isToday)
 
   return (
@@ -225,12 +232,9 @@ function FasceCard({ status }) {
     <div className="fasce">
       <div className="fasce-head">
         <span className="fasce-label">Questa settimana</span>
-        <span className="fasce-tier">
-          {currentTier ? currentTier.name : 'In costruzione'}
-        </span>
+        <span className="fasce-tier">{currentTier ? currentTier.name : 'In costruzione'}</span>
       </div>
 
-      {/* Barra a 4 segmenti (minima → standard → ottimale → piena) */}
       <div className="fascebar">
         {TIERS.map((t, i) => {
           const fill = i <= currentIndex ? 1 : i === currentIndex + 1 ? nextProgress : 0

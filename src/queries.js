@@ -22,7 +22,7 @@ export async function getBackboneSessions() {
          order_index,
          prescription,
          exercise (
-           id, name, progression_type, cue, default_reps, load_step,
+           id, name, progression_type, cue, default_reps, load_step, body_regions,
            exercise_alternative ( alt_name, alt_prescription, reason, order_index )
          )
        )`
@@ -72,6 +72,22 @@ export async function saveSession(payload) {
   }
 
   return dayLog
+}
+
+// Check-in soggettivo di fatica.
+export async function saveCheckin(state) {
+  const { error } = await supabase.from('week_checkin').insert({ state })
+  if (error) throwIfMissingTables(error)
+}
+
+export async function getLatestCheckin() {
+  const { data, error } = await supabase
+    .from('week_checkin')
+    .select('state, checkin_date')
+    .order('created_at', { ascending: false })
+    .limit(1)
+  if (error) throwIfMissingTables(error)
+  return data?.[0] ?? null
 }
 
 // Attività registrate in un intervallo di date (per la vista settimana).

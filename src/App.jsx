@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react'
-import { getBackboneSessions, getProgressionData } from './queries'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  getBackboneSessions, getProgressionData, getWeekLogs, getLatestCheckin,
+  saveSession, saveCheckin,
+} from './queries'
 import { computeSuggestion, lastLogSummary, SUGGEST_META } from './progression'
-import { isoDate } from './week'
+import { computeWeeklyLoad, fatigueState, deloadAdvice, computeActivePain } from './recovery'
+import { isoDate, weekRange } from './week'
 import LogForm from './LogForm'
 import WeekView from './WeekView'
 
@@ -20,16 +24,19 @@ export default function App() {
   const [active, setActive] = useState('A')
   const [errorMsg, setErrorMsg] = useState('')
   const [nav, setNav] = useState('week') // week | sessions
-  const [logging, setLogging] = useState(false) // modulo di registrazione aperto
+  const [logging, setLogging] = useState(false)
   const [toast, setToast] = useState('')
   const [progByEx, setProgByEx] = useState({})
+  const [weekLogs, setWeekLogs] = useState([])
+  const [checkin, setCheckin] = useState(null)
+
+  const days = weekRange().days
 
   useEffect(() => {
     getBackboneSessions()
       .then((data) => {
-        if (data.length === 0) {
-          setState('empty')
-        } else {
+        if (data.length === 0) setState('empty')
+        else {
           setSessions(data)
           setState('ready')
         }
@@ -41,14 +48,26 @@ export default function App() {
           setState('error')
         }
       })
-    refreshProgression()
+    refreshData()
   }, [])
 
-  function refreshProgression() {
-    getProgressionData()
-      .then(setProgByEx)
-      .catch(() => setProgByEx({}))
+  function refreshData() {
+    getProgressionData().then(setProgByEx).catch(() => setProgByEx({}))
+    getWeekLogs(isoDate(days[0]), isoDate(days[6])).then(setWeekLogs).catch(() => setWeekLogs([]))
+    getLatestCheckin().then(setCheckin).catch(() => setCheckin(null))
   }
+
+  // Indice esercizi (per le zone del corpo) e stato derivato di fatica/dolore.
+  const exById = useMemo(() => {
+    const m = {}
+    for (const s of sessions) for (const se of s.session_exercise) m[se.exercise.id] = se.exercise
+    return m
+  }, [sessions])
+
+  const activeRegions = useMemo(() => computeActivePain(progByEx, exById), [progByEx, exById])
+  const fatigue = useMemo(() => fatigueState(computeWeeklyLoad(weekLogs), checkin?.state), [weekLogs, checkin])
+  const deload = deloadAdvice(fatigue.state, checkin?.state, activeRegions)
+  const suggestCtx = { weekFatigue: fatigue.state, activeRegions }
 
   const current = sessions.find((s) => s.code === active)
 
@@ -57,7 +76,6 @@ export default function App() {
     setTimeout(() => setToast(''), 3000)
   }
 
-  // Apre il modulo di registrazione per una palestra (da "Oggi cosa fai?").
   function openSessionLog(code) {
     setActive(code)
     setLogging(true)
@@ -68,7 +86,31 @@ export default function App() {
     setLogging(false)
     setNav('week')
     showToast('Seduta registrata ✓')
-    refreshProgression()
+    refreshData()
+  }
+
+  async function quickLog(code) {
+    try {
+      await saveSession({
+        session_code: code === '__rest__' ? null : code,
+        status: code === '__rest__' ? 'rest' : 'done',
+        log_date: TODAY_ISO,
+      })
+      refreshData()
+      showToast('Segnato per oggi ✓')
+    } catch (e) {
+      showToast('Errore: ' + (e.message ?? e))
+    }
+  }
+
+  async function doCheckin(s) {
+    try {
+      await saveCheckin(s)
+      refreshData()
+      showToast('Sensazione registrata ✓')
+    } catch (e) {
+      showToast('Errore: ' + (e.message ?? e))
+    }
   }
 
   return (
@@ -112,7 +154,17 @@ export default function App() {
         )}
 
         {state === 'ready' && !logging && nav === 'week' && (
-          <WeekView onOpenSessionLog={openSessionLog} onToast={showToast} />
+          <WeekView
+            weekLogs={weekLogs}
+            days={days}
+            fatigue={fatigue}
+            deload={deload}
+            checkin={checkin}
+            activeRegions={activeRegions}
+            onOpenSessionLog={openSessionLog}
+            onQuickLog={quickLog}
+            onCheckin={doCheckin}
+          />
         )}
 
         {state === 'ready' && !logging && nav === 'sessions' && current && (
@@ -152,7 +204,7 @@ export default function App() {
                     </span>
                     {se.exercise.cue && <span className="excue">{se.exercise.cue}</span>}
                   </div>
-                  <ProgBadge exercise={se.exercise} history={progByEx[se.exercise.id]} />
+                  <ProgBadge exercise={se.exercise} history={progByEx[se.exercise.id]} ctx={suggestCtx} />
                   <AlternativeBlock alternatives={se.exercise.exercise_alternative} />
                 </li>
               ))}
@@ -165,8 +217,8 @@ export default function App() {
 }
 
 // Consiglio di progressione per la volta successiva, calcolato dallo storico.
-function ProgBadge({ exercise, history }) {
-  const sug = computeSuggestion(exercise, history ?? [], TODAY_ISO)
+function ProgBadge({ exercise, history, ctx }) {
+  const sug = computeSuggestion(exercise, history ?? [], TODAY_ISO, ctx)
   const meta = SUGGEST_META[sug.code]
   const summary = lastLogSummary(sug.last)
 
