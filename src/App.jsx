@@ -157,7 +157,8 @@ export default function App() {
     <div className="page">
       <header className="hero">
         <div className="hero-top">
-          <span className="brand">🏄 Surf Training</span>
+          <img className="hero-logo" src="/icon-192.png" alt="" />
+          <span className="brand">Surf Training</span>
           <span className="hero-tag">Allenamento per il surf</span>
         </div>
         <div className="hero-waves" aria-hidden="true">
