@@ -159,20 +159,6 @@ export default function App() {
         <span className="brand">🏄 Surf Training</span>
       </header>
 
-      {state === 'ready' && !logging && (
-        <nav className="mainnav">
-          <button className={'navbtn' + (nav === 'week' ? ' navbtn--on' : '')} onClick={() => setNav('week')}>
-            Settimana
-          </button>
-          <button className={'navbtn' + (nav === 'sessions' ? ' navbtn--on' : '')} onClick={() => setNav('sessions')}>
-            Allenamenti
-          </button>
-          <button className={'navbtn' + (nav === 'corpo' ? ' navbtn--on' : '')} onClick={() => setNav('corpo')}>
-            Corpo
-          </button>
-        </nav>
-      )}
-
       <main className="content">
         {toast && <div className="toast">{toast}</div>}
 
@@ -268,6 +254,25 @@ export default function App() {
           </>
         )}
       </main>
+
+      {state === 'ready' && !logging && (
+        <nav className="tabbar">
+          {[
+            ['week', '🗓️', 'Settimana'],
+            ['sessions', '💪', 'Allenamenti'],
+            ['corpo', '⚖️', 'Corpo'],
+          ].map(([key, icon, label]) => (
+            <button
+              key={key}
+              className={'tabbar-btn' + (nav === key ? ' tabbar-btn--on' : '')}
+              onClick={() => setNav(key)}
+            >
+              <span className="tabbar-ico">{icon}</span>
+              <span className="tabbar-lbl">{label}</span>
+            </button>
+          ))}
+        </nav>
+      )}
     </div>
   )
 }
