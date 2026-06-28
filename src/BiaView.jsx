@@ -19,15 +19,17 @@ export default function BiaView({ scans, goalPhase, preTrip, onAddScan, onSetPha
   const sinceLast = daysSinceLastScan(scans, TODAY)
 
   return (
-    <div>
-      <h1 className="session-title">Composizione corporea</h1>
-      <p className="muted small">
-        Conta il trend, non il singolo numero. Misure standardizzate ogni 4–8 settimane.
-      </p>
+    <div className="screen">
+      <div>
+        <h1 className="session-title">Composizione corporea</h1>
+        <p className="muted small">
+          Conta il trend, non il singolo numero. Misure standardizzate ogni 4–8 settimane.
+        </p>
+      </div>
 
       {/* Fase obiettivo */}
-      <section className="bia-phase">
-        <h2 className="h2">Fase obiettivo</h2>
+      <section className="card">
+        <h2 className="card-title">Fase obiettivo</h2>
         <div className="phase-grid">
           {PHASES.map((p) => (
             <button
@@ -44,8 +46,11 @@ export default function BiaView({ scans, goalPhase, preTrip, onAddScan, onSetPha
       </section>
 
       {/* Essenziali ultima scansione */}
-      <section className="bia-latest">
-        <h2 className="h2">Ultima scansione {latest && <span className="muted small">· {fmtDate(latest.scan_date)}</span>}</h2>
+      <section className="card">
+        <div className="card-head">
+          <h2 className="card-title">Ultima scansione</h2>
+          {latest && <span className="muted small">{fmtDate(latest.scan_date)}</span>}
+        </div>
         {!latest ? (
           <p className="muted small">Nessuna scansione registrata. Aggiungine una qui sotto.</p>
         ) : (
@@ -80,8 +85,8 @@ export default function BiaView({ scans, goalPhase, preTrip, onAddScan, onSetPha
 
       {/* Storico */}
       {scans.length > 0 && (
-        <section className="bia-history">
-          <h2 className="h2">Storico</h2>
+        <section className="card">
+          <div className="card-head"><h2 className="card-title">Storico</h2></div>
           <ul className="loglist">
             {scans.map((s) => (
               <li key={s.id} className="logitem">
@@ -128,7 +133,7 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
   }
 
   return (
-    <details className="bia-add">
+    <details className="card bia-add">
       <summary>➕ Aggiungi una scansione</summary>
 
       {sinceLast != null && sinceLast < 28 && (

@@ -22,6 +22,12 @@ const TYPE_LABEL = {
   endurance: 'resistenza',
 }
 
+const FOCUS_SUB = {
+  A: 'Forza gambe · Core · Pop-up power',
+  B: 'Pagaiata · Spalla · Resistenza',
+  C: 'Equilibrio · Rotazione · Atletismo',
+}
+
 export default function App() {
   const [state, setState] = useState('loading') // loading | empty | error | ready
   const [sessions, setSessions] = useState([])
@@ -225,7 +231,7 @@ export default function App() {
         )}
 
         {state === 'ready' && !logging && nav === 'sessions' && current && (
-          <>
+          <div className="screen">
             <div className="tabs">
               {sessions.map((s) => (
                 <button
@@ -238,15 +244,19 @@ export default function App() {
               ))}
             </div>
 
-            <div className="title-row">
-              <div>
-                <h1 className="session-title">{current.name}</h1>
-                <p className="muted small">{current.session_exercise.length} esercizi</p>
+            <section className="hero-card">
+              <div className="hero-wavebg" aria-hidden="true">
+                <Icon name="forza" size={150} className="hero-wavebg-ico" />
               </div>
-              <button className="btn-primary sm" onClick={() => setLogging(true)}>
-                Registra
-              </button>
-            </div>
+              <div className="hero-body">
+                <span className="hero-pill">PALESTRA {current.code}</span>
+                <h2 className="hero-h">{current.name.replace(/^Palestra [ABC] — /, '')}</h2>
+                <p className="hero-sub">{FOCUS_SUB[current.code]} · {current.session_exercise.length} esercizi</p>
+                <button className="hero-cta" onClick={() => setLogging(true)}>
+                  Registra seduta<Icon name="chevron" size={20} />
+                </button>
+              </div>
+            </section>
 
             <ol className="exlist">
               {current.session_exercise.map((se) => (
@@ -266,7 +276,7 @@ export default function App() {
                 </li>
               ))}
             </ol>
-          </>
+          </div>
         )}
       </main>
 
