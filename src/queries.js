@@ -17,7 +17,7 @@ export async function getBackboneSessions() {
   const { data, error } = await supabase
     .from('session_template')
     .select(
-      `code, name,
+      `code, name, target_duration_min, target_duration_max,
        session_exercise (
          order_index,
          prescription,

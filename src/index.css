@@ -782,3 +782,140 @@ body {
 
 /* Nav attiva con un piccolo bagliore */
 .tabbar-btn--on .tabbar-ico { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.6)); }
+
+/* ============================================================
+   REDESIGN stile mockup
+   ============================================================ */
+
+/* App bar */
+.appbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  background: rgba(8, 18, 34, 0.9);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+.appbar-logo { width: 42px; height: 42px; border-radius: 11px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.appbar-titles { display: flex; flex-direction: column; line-height: 1.15; }
+.appbar-title { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
+.appbar-sub { font-size: 12px; color: #5eead4; font-weight: 600; }
+.appbar-stats {
+  margin-left: auto; width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #7dd3fc; background: rgba(125,211,252,0.1); border: 1px solid var(--border); cursor: pointer;
+}
+.appbar-deco { position: absolute; right: 56px; top: 0; width: 150px; height: 100%; opacity: 0.7; pointer-events: none; }
+
+/* Contenitore schermata */
+.screen { display: flex; flex-direction: column; gap: 14px; }
+
+/* Card base */
+.card {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+.card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.card-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8aa2b8; margin: 0; }
+
+/* Card OGGI */
+.hero-card {
+  position: relative; overflow: hidden;
+  border-radius: 20px; padding: 20px;
+  background: linear-gradient(135deg, #0c2740 0%, #0a1c30 60%, #0b1322 100%);
+  border: 1px solid rgba(34,211,238,0.18);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+}
+.hero-wavebg {
+  position: absolute; right: -16px; top: 0; bottom: 0; width: 55%;
+  display: flex; align-items: center; justify-content: flex-end;
+  opacity: 0.16; color: #22d3ee; pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 65%);
+  mask-image: linear-gradient(90deg, transparent, #000 65%);
+}
+.hero-body { position: relative; }
+.hero-pill {
+  display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+  color: #0b1322; background: linear-gradient(90deg, #5eead4, #22d3ee);
+  padding: 4px 12px; border-radius: 999px; margin-bottom: 12px;
+}
+.hero-pill--done { background: linear-gradient(90deg, #86efac, #34d399); }
+.hero-h { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+.hero-sub { font-size: 14px; color: #aac1d6; margin-top: 4px; }
+.hero-rows { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+.hero-row { display: flex; align-items: center; gap: 11px; }
+.hero-row-ic {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px; background: rgba(34,211,238,0.12); color: #5eead4;
+}
+.hero-row-lbl { display: block; font-size: 11px; color: #8aa2b8; }
+.hero-row-val { display: block; font-size: 15px; font-weight: 600; }
+.hero-cta {
+  margin-top: 18px; width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 15px; font-size: 16px; font-weight: 700; color: #04212b;
+  background: linear-gradient(90deg, #5eead4, #22d3ee);
+  border: none; border-radius: 14px; cursor: pointer;
+  box-shadow: 0 8px 22px rgba(34,211,238,0.3);
+  transition: transform 0.06s ease, filter 0.2s ease;
+}
+.hero-cta:active { transform: translateY(1px) scale(0.995); }
+.hero-cta:hover { filter: brightness(1.05); }
+.hero-quick { margin-top: 18px; display: flex; gap: 10px; }
+.hero-quick .hero-cta { margin-top: 0; }
+.hero-cta--ghost { background: rgba(255,255,255,0.06); color: #e2e8f0; box-shadow: none; border: 1px solid var(--border); }
+
+/* Carico settimana (anello) */
+.fatigue.card { padding: 16px; }
+.fat-main { display: flex; align-items: center; gap: 16px; }
+.ring { flex-shrink: 0; }
+.ring-bg { fill: none; stroke: rgba(255,255,255,0.09); stroke-width: 7; }
+.ring-fg { fill: none; stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+.fat-green .ring-fg { stroke: #22c55e; } .fat-green .fat-state { color: #86efac; }
+.fat-yellow .ring-fg { stroke: #facc15; } .fat-yellow .fat-state { color: #fde047; }
+.fat-red .ring-fg { stroke: #f87171; } .fat-red .fat-state { color: #fca5a5; }
+.fat-state { font-size: 24px; font-weight: 800; line-height: 1.05; }
+.fat-score { font-size: 15px; font-weight: 700; color: #cbd5e1; }
+.fat-score span { color: #7e95ac; font-weight: 600; }
+.fat-advice { margin-left: auto; max-width: 42%; font-size: 13px; color: #aac1d6; text-align: right; }
+.checkin-row { display: flex; gap: 8px; margin-top: 14px; }
+.cbtn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 6px; font-size: 13px; font-weight: 600; color: #aac1d6;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 11px; cursor: pointer;
+}
+.cbtn svg { opacity: 0.8; }
+.cbtn--on { background: rgba(34,211,238,0.16); border-color: #22d3ee; color: #a5f3fc; }
+.fat-yellow .cbtn--on { background: rgba(250,204,21,0.18); border-color: #facc15; color: #fde047; }
+.fat-red .cbtn--on { background: rgba(248,113,113,0.18); border-color: #f87171; color: #fca5a5; }
+
+/* Progresso settimana */
+.progrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.procell { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 13px; padding: 12px; }
+.pro-lbl { font-size: 12px; color: #8aa2b8; }
+.pro-val { display: block; margin-top: 3px; font-size: 22px; font-weight: 800; }
+.pro-tot { font-size: 14px; font-weight: 600; color: #7e95ac; }
+.spark { display: block; width: 100%; height: 22px; margin-top: 4px; }
+
+/* Striscia settimana con icone */
+.weekstrip { gap: 6px; }
+.wday { border-radius: 13px; min-height: 80px; }
+.wdico { color: #7dd3fc; }
+.wdico--plan { color: #56708a; opacity: 0.7; }
+
+/* Aggiungi attività */
+.actgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.actbtn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 4px; font-size: 12px; font-weight: 600; color: #cbd5e1;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 13px; cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.15s ease;
+}
+.actbtn svg { color: #7dd3fc; }
+.actbtn--gym svg { color: #5eead4; }
+.actbtn:active { transform: scale(0.97); }

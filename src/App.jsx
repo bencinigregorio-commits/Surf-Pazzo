@@ -11,6 +11,7 @@ import { isoDate, weekRange } from './week'
 import LogForm from './LogForm'
 import WeekView from './WeekView'
 import BiaView from './BiaView'
+import { Icon } from './Icons'
 
 const TODAY_ISO = isoDate(new Date())
 
@@ -155,19 +156,21 @@ export default function App() {
 
   return (
     <div className="page">
-      <header className="hero">
-        <div className="hero-top">
-          <img className="hero-logo" src="/icon-192.png" alt="" />
-          <span className="brand">Surf Training</span>
-          <span className="hero-tag">Allenamento per il surf</span>
+      <header className="appbar">
+        <img className="appbar-logo" src="/icon-192.png" alt="" />
+        <div className="appbar-titles">
+          <span className="appbar-title">Surf Training</span>
+          <span className="appbar-sub">Base atletica</span>
         </div>
-        <div className="hero-waves" aria-hidden="true">
-          <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
-            <path className="wv wv1" d="M-100,42 C150,82 350,2 600,42 C850,82 1050,2 1300,42 L1300,80 L-100,80 Z" />
-            <path className="wv wv2" d="M-100,52 C200,92 400,12 600,52 C800,92 1000,12 1300,52 L1300,80 L-100,80 Z" />
-            <path className="wv wv3" d="M-100,58 C200,86 400,32 600,58 C800,86 1000,32 1300,58 L1300,80 L-100,80 Z" />
-          </svg>
-        </div>
+        {state === 'ready' && (
+          <button className="appbar-stats" onClick={() => setNav('corpo')} aria-label="Corpo">
+            <Icon name="chart" size={20} />
+          </button>
+        )}
+        <svg className="appbar-deco" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 26 C40 10 70 34 110 22 S180 12 200 22" fill="none" stroke="rgba(34,211,238,0.35)" strokeWidth="1.5" />
+          <path d="M0 32 C40 18 70 40 110 28 S180 18 200 28" fill="none" stroke="rgba(125,211,252,0.18)" strokeWidth="1.5" />
+        </svg>
       </header>
 
       <main className="content">
@@ -203,6 +206,7 @@ export default function App() {
             activeRegions={activeRegions}
             tripDate={tripDate}
             tripPhase={tripPhase}
+            sessionsByCode={Object.fromEntries(sessions.map((s) => [s.code, s]))}
             onSetTripDate={changeTripDate}
             onOpenSessionLog={openSessionLog}
             onQuickLog={quickLog}
@@ -269,16 +273,16 @@ export default function App() {
       {state === 'ready' && !logging && (
         <nav className="tabbar">
           {[
-            ['week', '🗓️', 'Settimana'],
-            ['sessions', '💪', 'Allenamenti'],
-            ['corpo', '⚖️', 'Corpo'],
+            ['week', 'calendar', 'Settimana'],
+            ['sessions', 'wave', 'Training'],
+            ['corpo', 'body', 'Corpo'],
           ].map(([key, icon, label]) => (
             <button
               key={key}
               className={'tabbar-btn' + (nav === key ? ' tabbar-btn--on' : '')}
               onClick={() => setNav(key)}
             >
-              <span className="tabbar-ico">{icon}</span>
+              <Icon name={icon} size={23} className="tabbar-ico" />
               <span className="tabbar-lbl">{label}</span>
             </button>
           ))}

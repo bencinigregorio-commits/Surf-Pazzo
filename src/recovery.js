@@ -32,6 +32,12 @@ export function computeWeeklyLoad(weekLogs) {
   return Math.round(load * 10) / 10
 }
 
+// Punteggio 0-100 per l'anello della fatica (il soggettivo sposta la lancetta).
+export function fatigueScore(load, checkin) {
+  const adj = checkin === 'cotto' ? 25 : checkin === 'fresco' ? -25 : 0
+  return Math.max(0, Math.min(100, Math.round((load / GIALLO_MAX) * 100 + adj)))
+}
+
 // Stato di fatica: dal carico, corretto dal check-in soggettivo (che vince).
 export function fatigueState(load, checkin) {
   const base = load <= VERDE_MAX ? 'verde' : load <= GIALLO_MAX ? 'giallo' : 'rosso'
