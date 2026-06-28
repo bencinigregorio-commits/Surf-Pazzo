@@ -11,6 +11,8 @@ import { isoDate, weekRange } from './week'
 import LogForm from './LogForm'
 import WeekView from './WeekView'
 import BiaView from './BiaView'
+import Auth from './Auth'
+import { supabase } from './supabaseClient'
 import { Icon } from './Icons'
 
 const TODAY_ISO = isoDate(new Date())
@@ -42,10 +44,20 @@ export default function App() {
   const [tripDate, setTripDateState] = useState(null)
   const [biaScans, setBiaScans] = useState([])
   const [goalPhase, setGoalPhaseState] = useState('mantenimento')
+  const [session, setSession] = useState(undefined) // undefined = sto controllando
 
   const days = weekRange().days
 
+  // Stato di accesso (login via email).
   useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
+  // Carica i dati solo una volta che sei entrato.
+  useEffect(() => {
+    if (!session) return
     getBackboneSessions()
       .then((data) => {
         if (data.length === 0) setState('empty')
@@ -62,7 +74,7 @@ export default function App() {
         }
       })
     refreshData()
-  }, [])
+  }, [session])
 
   function refreshData() {
     getProgressionData().then(setProgByEx).catch(() => setProgByEx({}))
@@ -160,6 +172,20 @@ export default function App() {
     }
   }
 
+  async function signOut() {
+    await supabase.auth.signOut()
+  }
+
+  // Cancello di accesso: prima controllo, poi (se non loggato) mostro l'accesso.
+  if (session === undefined) {
+    return (
+      <div className="page">
+        <main className="content"><p className="muted center">Carico…</p></main>
+      </div>
+    )
+  }
+  if (!session) return <Auth />
+
   return (
     <div className="page">
       <header className="appbar">
@@ -168,11 +194,16 @@ export default function App() {
           <span className="appbar-title">Surf Training</span>
           <span className="appbar-sub">Base atletica</span>
         </div>
-        {state === 'ready' && (
-          <button className="appbar-stats" onClick={() => setNav('corpo')} aria-label="Corpo">
-            <Icon name="stats" size={24} />
+        <div className="appbar-actions">
+          {state === 'ready' && (
+            <button className="appbar-stats" onClick={() => setNav('corpo')} aria-label="Corpo">
+              <Icon name="stats" size={24} />
+            </button>
+          )}
+          <button className="appbar-stats appbar-logout" onClick={signOut} aria-label="Esci">
+            <Icon name="logout" size={18} />
           </button>
-        )}
+        </div>
         <svg className="appbar-deco" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0 26 C40 10 70 34 110 22 S180 12 200 22" fill="none" stroke="rgba(34,211,238,0.35)" strokeWidth="1.5" />
           <path d="M0 32 C40 18 70 40 110 28 S180 18 200 28" fill="none" stroke="rgba(125,211,252,0.18)" strokeWidth="1.5" />

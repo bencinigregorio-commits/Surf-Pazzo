@@ -926,3 +926,27 @@ body {
 .actbtn img { filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.35)); }
 .wdico { filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.3)); }
 .appbar-stats img { filter: drop-shadow(0 0 4px rgba(125, 211, 252, 0.4)); }
+
+/* Azioni in alto a destra + schermata di accesso */
+.appbar-actions { margin-left: auto; display: flex; gap: 8px; }
+.appbar-actions .appbar-stats { margin-left: 0; }
+.appbar-logout { color: #8aa2b8; background: rgba(255,255,255,0.05); }
+
+.auth {
+  min-height: 100vh; max-width: 380px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px 28px; text-align: center;
+}
+.auth-logo { width: 84px; height: 84px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); margin-bottom: 18px; }
+.auth-title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+.auth-sub { color: #8aa2b8; font-size: 15px; margin: 4px 0 22px; }
+.auth-form { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.auth-form .input { padding: 14px; font-size: 16px; text-align: center; }
+.auth-form .btn-primary { width: 100%; }
+.auth-sent {
+  background: rgba(34,211,238,0.08); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px; font-size: 15px; line-height: 1.5;
+}
+.auth-sent p { margin: 0; }
+.auth-sent p + p { margin-top: 8px; }
+.auth-foot { margin-top: 22px; max-width: 280px; }
