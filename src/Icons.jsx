@@ -86,7 +86,24 @@ const PATHS = {
   ),
 }
 
+// Icone personalizzate (neon) fornite dall'utente.
+const CUSTOM = {
+  settimana: '/icons/settimana.png',
+  training: '/icons/training.png',
+  corpo: '/icons/corpo.png',
+  forza: '/icons/forza.png',
+  corsa: '/icons/corsa.png',
+  mobilita: '/icons/mobilita.png',
+  balance: '/icons/balance.png',
+  recupero: '/icons/recupero.png',
+  riposo: '/icons/riposo.png',
+  stats: '/icons/stats.png',
+}
+
 export function Icon({ name, size = 22, className, style }) {
+  if (CUSTOM[name]) {
+    return <img src={CUSTOM[name]} width={size} height={size} className={className} style={style} alt="" />
+  }
   const path = PATHS[name]
   if (!path) return null
   return (

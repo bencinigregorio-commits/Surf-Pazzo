@@ -5,11 +5,11 @@ import {
 import { FATIGUE_META, fatigueScore } from './recovery'
 import { Icon } from './Icons'
 
-// Icona "a linea" per ogni tipo di attività.
+// Icona (neon personalizzata) per ogni tipo di attività.
 const ACT_ICON = {
-  A: 'dumbbell', B: 'dumbbell', C: 'dumbbell',
-  corsa: 'run', calcetto: 'ball', mobilita: 'yoga',
-  balance: 'balance', recovery: 'recovery', rest: 'rest',
+  A: 'forza', B: 'forza', C: 'forza',
+  corsa: 'corsa', calcetto: 'ball', mobilita: 'mobilita',
+  balance: 'balance', recovery: 'recupero', rest: 'riposo',
 }
 
 // Sottotitolo e focus surf per le sedute portanti.
@@ -20,12 +20,12 @@ const SESSION_FOCUS = {
 }
 
 const QUICK = [
-  { code: 'corsa', label: 'Corsa', icon: 'run' },
+  { code: 'corsa', label: 'Corsa', icon: 'corsa' },
   { code: 'calcetto', label: 'Calcetto', icon: 'ball' },
-  { code: 'mobilita', label: 'Mobilità', icon: 'yoga' },
+  { code: 'mobilita', label: 'Mobilità', icon: 'mobilita' },
   { code: 'balance', label: 'Balance', icon: 'balance' },
-  { code: 'recovery', label: 'Recupero', icon: 'recovery' },
-  { code: '__rest__', label: 'Riposo', icon: 'rest' },
+  { code: 'recovery', label: 'Recupero', icon: 'recupero' },
+  { code: '__rest__', label: 'Riposo', icon: 'riposo' },
 ]
 
 const CHECKINS = [
@@ -73,10 +73,10 @@ export default function WeekView({
               <span className="wdnum">{d.getDate()}</span>
               <div className="wdacts">
                 {dayLogs.map((l) => (
-                  <Icon key={l.id} name={l.status === 'rest' ? 'rest' : ACT_ICON[l.session_code] ?? 'wave'} size={15} className="wdico" />
+                  <Icon key={l.id} name={l.status === 'rest' ? 'riposo' : ACT_ICON[l.session_code] ?? 'training'} size={18} className="wdico" />
                 ))}
                 {dayLogs.length === 0 && planned && planned !== 'free' && (
-                  <Icon name={ACT_ICON[planned] ?? (planned === 'cardio' ? 'run' : 'wave')} size={15} className="wdico wdico--plan" />
+                  <Icon name={ACT_ICON[planned] ?? (planned === 'cardio' ? 'corsa' : planned === 'mobility' ? 'mobilita' : 'training')} size={18} className="wdico wdico--plan" />
                 )}
               </div>
             </div>
@@ -92,13 +92,13 @@ export default function WeekView({
         <div className="actgrid">
           {['A', 'B', 'C'].map((code) => (
             <button key={code} className="actbtn actbtn--gym" onClick={() => onOpenSessionLog(code)}>
-              <Icon name="dumbbell" size={20} />
+              <Icon name="forza" size={26} />
               <span>Forza {code}</span>
             </button>
           ))}
           {QUICK.map((q) => (
             <button key={q.code} className="actbtn" onClick={() => onQuickLog(q.code)}>
-              <Icon name={q.icon} size={20} />
+              <Icon name={q.icon} size={26} />
               <span>{q.label}</span>
             </button>
           ))}
@@ -138,7 +138,7 @@ function TodayHero({ plan, sessionsByCode, onOpenSessionLog, onQuickLog }) {
     sub = 'Una corsa facile o un calcetto'
     action = (
       <div className="hero-quick">
-        <button className="hero-cta" onClick={() => onQuickLog('corsa')}><Icon name="run" size={18} />Corsa</button>
+        <button className="hero-cta" onClick={() => onQuickLog('corsa')}><Icon name="corsa" size={20} />Corsa</button>
         <button className="hero-cta hero-cta--ghost" onClick={() => onQuickLog('calcetto')}><Icon name="ball" size={18} />Calcetto</button>
       </div>
     )

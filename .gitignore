@@ -10,6 +10,9 @@ dev-dist
 .claude/settings.local.json
 programma_surf_completo.txt
 
+# Sorgenti grafiche pesanti (l'app usa le versioni ottimizzate in public/)
+icone interne app/
+
 # Chiavi e segreti: NON devono mai finire online
 .env
 .env.local

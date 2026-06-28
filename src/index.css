@@ -919,3 +919,10 @@ body {
 .actbtn svg { color: #7dd3fc; }
 .actbtn--gym svg { color: #5eead4; }
 .actbtn:active { transform: scale(0.97); }
+
+/* Icone personalizzate (neon) dell'utente */
+.tabbar-ico { opacity: 0.5; transition: opacity 0.15s ease; }
+.tabbar-btn--on .tabbar-ico { opacity: 1; }
+.actbtn img { filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.35)); }
+.wdico { filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.3)); }
+.appbar-stats img { filter: drop-shadow(0 0 4px rgba(125, 211, 252, 0.4)); }

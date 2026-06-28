@@ -164,7 +164,7 @@ export default function App() {
         </div>
         {state === 'ready' && (
           <button className="appbar-stats" onClick={() => setNav('corpo')} aria-label="Corpo">
-            <Icon name="chart" size={20} />
+            <Icon name="stats" size={24} />
           </button>
         )}
         <svg className="appbar-deco" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
@@ -273,9 +273,9 @@ export default function App() {
       {state === 'ready' && !logging && (
         <nav className="tabbar">
           {[
-            ['week', 'calendar', 'Settimana'],
-            ['sessions', 'wave', 'Training'],
-            ['corpo', 'body', 'Corpo'],
+            ['week', 'settimana', 'Settimana'],
+            ['sessions', 'training', 'Training'],
+            ['corpo', 'corpo', 'Corpo'],
           ].map(([key, icon, label]) => (
             <button
               key={key}
