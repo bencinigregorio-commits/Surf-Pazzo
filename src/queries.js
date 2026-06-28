@@ -74,6 +74,37 @@ export async function saveSession(payload) {
   return dayLog
 }
 
+// BIA: scansioni e fase obiettivo.
+export async function getBiaScans() {
+  const { data, error } = await supabase
+    .from('bia_scan')
+    .select('*')
+    .order('scan_date', { ascending: false })
+    .limit(50)
+  if (error) throwIfMissingTables(error)
+  return data ?? []
+}
+
+export async function addBiaScan(scan) {
+  const { error } = await supabase.from('bia_scan').insert(scan)
+  if (error) throwIfMissingTables(error)
+}
+
+export async function getGoalPhase() {
+  const { data, error } = await supabase
+    .from('goal_phase')
+    .select('phase')
+    .order('created_at', { ascending: false })
+    .limit(1)
+  if (error) throwIfMissingTables(error)
+  return data?.[0]?.phase ?? 'mantenimento'
+}
+
+export async function setGoalPhase(phase) {
+  const { error } = await supabase.from('goal_phase').insert({ phase })
+  if (error) throwIfMissingTables(error)
+}
+
 // Configurazione viaggio (modalità pre-trip).
 export async function getTripConfig() {
   const { data, error } = await supabase

@@ -45,10 +45,12 @@ function consecutiveGoodQuality(history) {
 // settimanale { weekFatigue: 'verde'|'giallo'|'rosso', activeRegions: [{region,severity}] }.
 export function computeSuggestion(exercise, history, todayIso, ctx = {}) {
   const base = baseSuggestion(exercise, history, todayIso, ctx)
+  if (base.code !== 'PROGREDISCI') return base
+
   // Freno fatica: settimana "rossa" sempre; in pre-trip basta il "giallo".
   const capByFatigue =
     ctx.weekFatigue === 'rosso' || (ctx.preTrip && ctx.weekFatigue === 'giallo')
-  if (base.code === 'PROGREDISCI' && capByFatigue) {
+  if (capByFatigue) {
     return {
       ...base,
       code: 'MANTIENI',
@@ -57,6 +59,13 @@ export function computeSuggestion(exercise, history, todayIso, ctx = {}) {
         : 'Settimana "rossa": tetto a mantieni (priorità recupero).',
     }
   }
+
+  // Fase "asciugatura": la forza si preserva, non si rincorrono PR (ma il
+  // pre-trip sospende l'asciugatura, quindi lì non si applica).
+  if (!ctx.preTrip && ctx.goalPhase === 'asciugatura' && exercise.progression_type === 'load') {
+    return { ...base, code: 'MANTIENI', hint: 'Asciugatura: preserva i carichi, non rincorrere i massimali.' }
+  }
+
   return base
 }
 

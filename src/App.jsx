@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   getBackboneSessions, getProgressionData, getWeekLogs, getLatestCheckin,
   getTripConfig, setTripDate, saveSession, saveCheckin,
+  getBiaScans, addBiaScan, getGoalPhase, setGoalPhase,
 } from './queries'
 import { computeSuggestion, lastLogSummary, SUGGEST_META } from './progression'
 import { computeWeeklyLoad, fatigueState, deloadAdvice, computeActivePain } from './recovery'
@@ -9,6 +10,7 @@ import { computeTripPhase } from './trip'
 import { isoDate, weekRange } from './week'
 import LogForm from './LogForm'
 import WeekView from './WeekView'
+import BiaView from './BiaView'
 
 const TODAY_ISO = isoDate(new Date())
 
@@ -31,6 +33,8 @@ export default function App() {
   const [weekLogs, setWeekLogs] = useState([])
   const [checkin, setCheckin] = useState(null)
   const [tripDate, setTripDateState] = useState(null)
+  const [biaScans, setBiaScans] = useState([])
+  const [goalPhase, setGoalPhaseState] = useState('mantenimento')
 
   const days = weekRange().days
 
@@ -58,6 +62,8 @@ export default function App() {
     getWeekLogs(isoDate(days[0]), isoDate(days[6])).then(setWeekLogs).catch(() => setWeekLogs([]))
     getLatestCheckin().then(setCheckin).catch(() => setCheckin(null))
     getTripConfig().then((t) => setTripDateState(t?.trip_date ?? null)).catch(() => setTripDateState(null))
+    getBiaScans().then(setBiaScans).catch(() => setBiaScans([]))
+    getGoalPhase().then(setGoalPhaseState).catch(() => setGoalPhaseState('mantenimento'))
   }
 
   // Indice esercizi (per le zone del corpo) e stato derivato di fatica/dolore.
@@ -71,7 +77,7 @@ export default function App() {
   const fatigue = useMemo(() => fatigueState(computeWeeklyLoad(weekLogs), checkin?.state), [weekLogs, checkin])
   const deload = deloadAdvice(fatigue.state, checkin?.state, activeRegions)
   const tripPhase = useMemo(() => computeTripPhase(tripDate, TODAY_ISO), [tripDate])
-  const suggestCtx = { weekFatigue: fatigue.state, activeRegions, preTrip: tripPhase.active }
+  const suggestCtx = { weekFatigue: fatigue.state, activeRegions, preTrip: tripPhase.active, goalPhase }
 
   const current = sessions.find((s) => s.code === active)
 
@@ -127,6 +133,26 @@ export default function App() {
     }
   }
 
+  async function addScan(scan) {
+    try {
+      await addBiaScan(scan)
+      refreshData()
+      showToast('Scansione salvata ✓')
+    } catch (e) {
+      showToast('Errore: ' + (e.message ?? e))
+    }
+  }
+
+  async function changeGoalPhase(phase) {
+    try {
+      await setGoalPhase(phase)
+      refreshData()
+      showToast('Fase obiettivo aggiornata ✓')
+    } catch (e) {
+      showToast('Errore: ' + (e.message ?? e))
+    }
+  }
+
   return (
     <div className="page">
       <header className="topbar">
@@ -140,6 +166,9 @@ export default function App() {
           </button>
           <button className={'navbtn' + (nav === 'sessions' ? ' navbtn--on' : '')} onClick={() => setNav('sessions')}>
             Allenamenti
+          </button>
+          <button className={'navbtn' + (nav === 'corpo' ? ' navbtn--on' : '')} onClick={() => setNav('corpo')}>
+            Corpo
           </button>
         </nav>
       )}
@@ -181,6 +210,16 @@ export default function App() {
             onOpenSessionLog={openSessionLog}
             onQuickLog={quickLog}
             onCheckin={doCheckin}
+          />
+        )}
+
+        {state === 'ready' && !logging && nav === 'corpo' && (
+          <BiaView
+            scans={biaScans}
+            goalPhase={goalPhase}
+            preTrip={tripPhase.active}
+            onAddScan={addScan}
+            onSetPhase={changeGoalPhase}
           />
         )}
 
