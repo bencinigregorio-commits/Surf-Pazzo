@@ -155,8 +155,18 @@ export default function App() {
 
   return (
     <div className="page">
-      <header className="topbar">
-        <span className="brand">🏄 Surf Training</span>
+      <header className="hero">
+        <div className="hero-top">
+          <span className="brand">🏄 Surf Training</span>
+          <span className="hero-tag">Allenamento per il surf</span>
+        </div>
+        <div className="hero-waves" aria-hidden="true">
+          <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
+            <path className="wv wv1" d="M-100,42 C150,82 350,2 600,42 C850,82 1050,2 1300,42 L1300,80 L-100,80 Z" />
+            <path className="wv wv2" d="M-100,52 C200,92 400,12 600,52 C800,92 1000,12 1300,52 L1300,80 L-100,80 Z" />
+            <path className="wv wv3" d="M-100,58 C200,86 400,32 600,58 C800,86 1000,32 1300,58 L1300,80 L-100,80 Z" />
+          </svg>
+        </div>
       </header>
 
       <main className="content">

@@ -704,3 +704,74 @@ body {
 /* Titoli di sezione un filo più nitidi */
 .session-title { letter-spacing: -0.02em; }
 .h2 { letter-spacing: -0.01em; color: #d6e3f0; }
+
+/* ===== Intestazione "hero" con onde animate ===== */
+:root { --page-bg: #07101e; }
+
+.hero {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(125deg, #06b6d4 0%, #2563eb 55%, #4f46e5 100%);
+}
+.hero-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 20px 20px 30px;
+}
+.hero .brand {
+  background: none;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: #ffffff;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+.hero-tag {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+}
+.hero-waves { line-height: 0; margin-bottom: -1px; }
+.hero-waves svg { display: block; width: 100%; height: 40px; }
+.wv1 { fill: rgba(165, 243, 252, 0.30); animation: drift 8s ease-in-out infinite alternate; }
+.wv2 { fill: rgba(125, 211, 252, 0.22); animation: drift 11s ease-in-out infinite alternate-reverse; }
+.wv3 { fill: var(--page-bg); }
+@keyframes drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-36px); }
+}
+
+/* Sfondo coerente con la base dell'onda */
+body {
+  background:
+    radial-gradient(90% 55% at 90% 100%, rgba(14, 116, 144, 0.16) 0%, rgba(14,116,144,0) 60%),
+    linear-gradient(180deg, #07101e 0%, #050b14 100%);
+}
+
+/* Titoli di schermata più grandi e decisi */
+.session-title { font-size: 26px; font-weight: 800; margin-top: 4px; }
+
+/* Semaforo fatica più grande e leggibile */
+.fatigue-state { font-size: 22px; }
+.fatigue-dot { width: 14px; height: 14px; box-shadow: 0 0 12px currentColor; }
+.fat-green .fatigue-dot { color: #22c55e; }
+.fat-yellow .fatigue-dot { color: #facc15; }
+.fat-red .fatigue-dot { color: #f87171; }
+
+/* Fasce: barra più alta e tier più grande */
+.fseg { height: 12px; }
+.fasce-tier { font-size: 20px; }
+
+/* Proposta: titolo più grande */
+.prop-title { font-size: 22px; }
+.prop-kicker { color: #a5f3fc; }
+
+/* Nav attiva con un piccolo bagliore */
+.tabbar-btn--on .tabbar-ico { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.6)); }
