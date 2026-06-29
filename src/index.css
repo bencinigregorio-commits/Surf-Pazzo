@@ -950,3 +950,5 @@ body {
 .auth-sent p { margin: 0; }
 .auth-sent p + p { margin-top: 8px; }
 .auth-foot { margin-top: 22px; max-width: 280px; }
+.auth-code { font-size: 26px; letter-spacing: 0.4em; text-align: center; font-weight: 700; }
+.auth .link { margin-top: 14px; }

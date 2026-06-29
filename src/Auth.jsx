@@ -3,53 +3,80 @@ import { supabase } from './supabaseClient'
 
 export default function Auth() {
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [code, setCode] = useState('')
+  const [step, setStep] = useState('email') // email | code
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function sendLink(e) {
+  async function sendCode(e) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    })
+    const { error } = await supabase.auth.signInWithOtp({ email })
     if (error) setError(error.message)
-    else setSent(true)
+    else setStep('code')
     setLoading(false)
+  }
+
+  async function verify(e) {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    const { error } = await supabase.auth.verifyOtp({ email, token: code.trim(), type: 'email' })
+    if (error) setError('Codice non valido o scaduto. Richiedine uno nuovo.')
+    setLoading(false)
+    // Se va a buon fine, App rileva la sessione e mostra l'app.
   }
 
   return (
     <div className="auth">
       <img className="auth-logo" src="/icon-192.png" alt="" />
       <h1 className="auth-title">Surf Training</h1>
-      <p className="auth-sub">Accedi con la tua email</p>
 
-      {sent ? (
-        <div className="auth-sent">
-          <p>📨 Ti ho inviato un link a <b>{email}</b>.</p>
-          <p className="muted small">Apri la mail e clicca il link per entrare. Puoi tornare qui dopo.</p>
-        </div>
+      {step === 'email' ? (
+        <>
+          <p className="auth-sub">Accedi con la tua email</p>
+          <form className="auth-form" onSubmit={sendCode}>
+            <input
+              className="input"
+              type="email"
+              required
+              placeholder="latua@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button className="btn-primary" disabled={loading || !email}>
+              {loading ? 'Invio…' : 'Inviami il codice'}
+            </button>
+            {error && <p className="errdetail">{error}</p>}
+          </form>
+        </>
       ) : (
-        <form className="auth-form" onSubmit={sendLink}>
-          <input
-            className="input"
-            type="email"
-            required
-            placeholder="latua@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <button className="btn-primary" disabled={loading || !email}>
-            {loading ? 'Invio…' : 'Inviami il link'}
+        <>
+          <p className="auth-sub">Inserisci il codice inviato a<br /><b>{email}</b></p>
+          <form className="auth-form" onSubmit={verify}>
+            <input
+              className="input auth-code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              placeholder="••••••"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            />
+            <button className="btn-primary" disabled={loading || code.length < 6}>
+              {loading ? 'Verifico…' : 'Entra'}
+            </button>
+            {error && <p className="errdetail">{error}</p>}
+          </form>
+          <button className="link" onClick={() => { setStep('email'); setCode(''); setError('') }}>
+            ← cambia email
           </button>
-          {error && <p className="errdetail">{error}</p>}
-        </form>
+        </>
       )}
 
       <p className="auth-foot muted small">
-        Solo per te. Niente password: ricevi un link sicuro via email.
+        Niente password: ricevi un codice via email, lo digiti qui, ed entri.
       </p>
     </div>
   )
