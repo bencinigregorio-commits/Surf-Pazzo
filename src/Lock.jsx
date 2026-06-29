@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 // Codice di accesso dell'app (modificabile qui). Repo privato: ok tenerlo qui.
-export const ACCESS_CODE = '0000'
+export const ACCESS_CODE = '1506'
 
 export default function Lock({ onUnlock }) {
   const [code, setCode] = useState('')
