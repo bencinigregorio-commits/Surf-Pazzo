@@ -62,9 +62,9 @@ export default function Auth() {
               required
               placeholder="••••••"
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
             />
-            <button className="btn-primary" disabled={loading || code.length < 6}>
+            <button className="btn-primary" disabled={loading || code.length < 4}>
               {loading ? 'Verifico…' : 'Entra'}
             </button>
             {error && <p className="errdetail">{error}</p>}
