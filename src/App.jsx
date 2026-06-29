@@ -11,8 +11,7 @@ import { isoDate, weekRange } from './week'
 import LogForm from './LogForm'
 import WeekView from './WeekView'
 import BiaView from './BiaView'
-import Auth from './Auth'
-import { supabase } from './supabaseClient'
+import Lock from './Lock'
 import { Icon } from './Icons'
 
 const TODAY_ISO = isoDate(new Date())
@@ -44,20 +43,11 @@ export default function App() {
   const [tripDate, setTripDateState] = useState(null)
   const [biaScans, setBiaScans] = useState([])
   const [goalPhase, setGoalPhaseState] = useState('mantenimento')
-  const [session, setSession] = useState(undefined) // undefined = sto controllando
+  const [unlocked, setUnlocked] = useState(() => localStorage.getItem('surf_ok') === '1')
 
   const days = weekRange().days
 
-  // Stato di accesso (login via email).
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
-    return () => sub.subscription.unsubscribe()
-  }, [])
-
-  // Carica i dati solo una volta che sei entrato.
-  useEffect(() => {
-    if (!session) return
     getBackboneSessions()
       .then((data) => {
         if (data.length === 0) setState('empty')
@@ -74,7 +64,7 @@ export default function App() {
         }
       })
     refreshData()
-  }, [session])
+  }, [])
 
   function refreshData() {
     getProgressionData().then(setProgByEx).catch(() => setProgByEx({}))
@@ -172,19 +162,12 @@ export default function App() {
     }
   }
 
-  async function signOut() {
-    await supabase.auth.signOut()
+  function relock() {
+    localStorage.removeItem('surf_ok')
+    setUnlocked(false)
   }
 
-  // Cancello di accesso: prima controllo, poi (se non loggato) mostro l'accesso.
-  if (session === undefined) {
-    return (
-      <div className="page">
-        <main className="content"><p className="muted center">Carico…</p></main>
-      </div>
-    )
-  }
-  if (!session) return <Auth />
+  if (!unlocked) return <Lock onUnlock={() => setUnlocked(true)} />
 
   return (
     <div className="page">
@@ -200,7 +183,7 @@ export default function App() {
               <Icon name="stats" size={24} />
             </button>
           )}
-          <button className="appbar-stats appbar-logout" onClick={signOut} aria-label="Esci">
+          <button className="appbar-stats appbar-logout" onClick={relock} aria-label="Blocca">
             <Icon name="logout" size={18} />
           </button>
         </div>
