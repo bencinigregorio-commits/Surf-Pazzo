@@ -78,7 +78,7 @@ export async function saveSession(payload) {
 export async function getMobility() {
   const { data, error } = await supabase
     .from('mobility_exercise')
-    .select('context, phase, order_index, name, prescription, cue')
+    .select('context, phase, order_index, name, prescription, cue, youtube_term')
   if (error) throwIfMissingTables(error)
   return data ?? []
 }

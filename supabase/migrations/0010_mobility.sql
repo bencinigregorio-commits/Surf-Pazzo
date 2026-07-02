@@ -13,8 +13,11 @@ create table if not exists mobility_exercise (
   order_index  int not null,
   name         text not null,
   prescription text,
-  cue          text
+  cue          text,
+  youtube_term text   -- termine di ricerca YouTube per il pulsante video
 );
+-- Se la tabella esisteva già, assicura la colonna nuova:
+alter table mobility_exercise add column if not exists youtube_term text;
 create index if not exists mobility_ctx_idx on mobility_exercise (context, phase, order_index);
 
 alter table mobility_exercise enable row level security;

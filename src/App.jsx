@@ -14,6 +14,7 @@ import BiaView from './BiaView'
 import MobilityView from './MobilityView'
 import Lock from './Lock'
 import { Icon } from './Icons'
+import VideoButton from './VideoButton'
 
 const TODAY_ISO = isoDate(new Date())
 
@@ -293,6 +294,7 @@ export default function App() {
                     {se.exercise.cue && <span className="excue">{se.exercise.cue}</span>}
                   </div>
                   <ProgBadge exercise={se.exercise} history={progByEx[se.exercise.id]} ctx={suggestCtx} />
+                  <div className="exvideo"><VideoButton term={se.exercise.youtube_term} name={se.exercise.name} /></div>
                   <AlternativeBlock alternatives={se.exercise.exercise_alternative} />
                 </li>
               ))}

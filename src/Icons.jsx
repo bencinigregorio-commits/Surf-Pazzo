@@ -85,6 +85,7 @@ const PATHS = {
     <path d="M12 3c1 3 4 4 4 8a4 4 0 0 1-8 0c0-1.5.5-2.5 1.2-3.3C9.5 9 10 7 9 5c2 .5 2.5 1.5 3 2 .3-1.5 0-3 0-4z" />
   ),
   logout: <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11" />,
+  play: <path d="M8 5v14l11-7z" fill="currentColor" stroke="none" />,
 }
 
 // Icone personalizzate (neon) fornite dall'utente.

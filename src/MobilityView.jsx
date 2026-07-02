@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Icon } from './Icons'
+import VideoButton from './VideoButton'
 
 const CONTEXTS = [
   { key: 'generico', label: 'Generico', icon: 'mobilita' },
@@ -62,6 +63,7 @@ function MobBlock({ title, items }) {
                 {it.prescription && <span className="exresc">{it.prescription}</span>}
               </div>
               {it.cue && <div className="exmeta"><span className="excue">{it.cue}</span></div>}
+              <VideoButton term={it.youtube_term} name={it.name} />
             </li>
           ))}
         </ol>
