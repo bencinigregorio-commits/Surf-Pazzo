@@ -74,6 +74,15 @@ export async function saveSession(payload) {
   return dayLog
 }
 
+// Schede di mobilità/stretching (per contesto e fase).
+export async function getMobility() {
+  const { data, error } = await supabase
+    .from('mobility_exercise')
+    .select('context, phase, order_index, name, prescription, cue')
+  if (error) throwIfMissingTables(error)
+  return data ?? []
+}
+
 // BIA: scansioni e fase obiettivo.
 export async function getBiaScans() {
   const { data, error } = await supabase

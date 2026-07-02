@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   getBackboneSessions, getProgressionData, getWeekLogs, getLatestCheckin,
   getTripConfig, setTripDate, saveSession, saveCheckin,
-  getBiaScans, addBiaScan, getGoalPhase, setGoalPhase,
+  getBiaScans, addBiaScan, getGoalPhase, setGoalPhase, getMobility,
 } from './queries'
 import { computeSuggestion, lastLogSummary, SUGGEST_META } from './progression'
 import { computeWeeklyLoad, fatigueState, deloadAdvice, computeActivePain } from './recovery'
@@ -11,6 +11,7 @@ import { isoDate, weekRange } from './week'
 import LogForm from './LogForm'
 import WeekView from './WeekView'
 import BiaView from './BiaView'
+import MobilityView from './MobilityView'
 import Lock from './Lock'
 import { Icon } from './Icons'
 
@@ -43,6 +44,7 @@ export default function App() {
   const [tripDate, setTripDateState] = useState(null)
   const [biaScans, setBiaScans] = useState([])
   const [goalPhase, setGoalPhaseState] = useState('mantenimento')
+  const [mobility, setMobility] = useState([])
   const [unlocked, setUnlocked] = useState(() => localStorage.getItem('surf_ok') === '1')
 
   const days = weekRange().days
@@ -73,6 +75,7 @@ export default function App() {
     getTripConfig().then((t) => setTripDateState(t?.trip_date ?? null)).catch(() => setTripDateState(null))
     getBiaScans().then(setBiaScans).catch(() => setBiaScans([]))
     getGoalPhase().then(setGoalPhaseState).catch(() => setGoalPhaseState('mantenimento'))
+    getMobility().then(setMobility).catch(() => setMobility([]))
   }
 
   // Indice esercizi (per le zone del corpo) e stato derivato di fatica/dolore.
@@ -234,6 +237,10 @@ export default function App() {
           />
         )}
 
+        {state === 'ready' && !logging && nav === 'mobility' && (
+          <MobilityView mobility={mobility} onDone={() => quickLog('mobilita')} />
+        )}
+
         {state === 'ready' && !logging && nav === 'corpo' && (
           <BiaView
             scans={biaScans}
@@ -299,6 +306,7 @@ export default function App() {
           {[
             ['week', 'settimana', 'Settimana'],
             ['sessions', 'training', 'Training'],
+            ['mobility', 'mobilita', 'Mobilità'],
             ['corpo', 'corpo', 'Corpo'],
           ].map(([key, icon, label]) => (
             <button
