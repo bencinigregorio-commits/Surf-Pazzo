@@ -945,6 +945,9 @@ body {
 .ctxchip--on { border-color: #22d3ee; background: rgba(34,211,238,0.12); color: #a5f3fc; }
 .ctxchip--on img { opacity: 1; }
 
+/* Riga pulsante "Modifica esercizi" */
+.editrow { display: flex; justify-content: flex-end; margin-top: -4px; }
+
 /* Pulsante Video (ricerca YouTube) */
 .exvideo { margin-top: 10px; }
 .vidbtn {

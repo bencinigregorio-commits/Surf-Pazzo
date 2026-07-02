@@ -13,6 +13,7 @@ import WeekView from './WeekView'
 import BiaView from './BiaView'
 import MobilityView from './MobilityView'
 import Lock from './Lock'
+import EditSession from './EditSession'
 import { Icon } from './Icons'
 import VideoButton from './VideoButton'
 
@@ -38,6 +39,7 @@ export default function App() {
   const [errorMsg, setErrorMsg] = useState('')
   const [nav, setNav] = useState('week') // week | sessions
   const [logging, setLogging] = useState(false)
+  const [editing, setEditing] = useState(false)
   const [toast, setToast] = useState('')
   const [progByEx, setProgByEx] = useState({})
   const [weekLogs, setWeekLogs] = useState([])
@@ -50,8 +52,8 @@ export default function App() {
 
   const days = weekRange().days
 
-  useEffect(() => {
-    getBackboneSessions()
+  function loadSessions() {
+    return getBackboneSessions()
       .then((data) => {
         if (data.length === 0) setState('empty')
         else {
@@ -66,6 +68,10 @@ export default function App() {
           setState('error')
         }
       })
+  }
+
+  useEffect(() => {
+    loadSessions()
     refreshData()
   }, [])
 
@@ -252,7 +258,15 @@ export default function App() {
           />
         )}
 
-        {state === 'ready' && !logging && nav === 'sessions' && current && (
+        {state === 'ready' && !logging && editing && nav === 'sessions' && current && (
+          <EditSession
+            session={current}
+            onSaved={() => { setEditing(false); loadSessions(); showToast('Modifiche salvate ✓') }}
+            onCancel={() => setEditing(false)}
+          />
+        )}
+
+        {state === 'ready' && !logging && !editing && nav === 'sessions' && current && (
           <div className="screen">
             <div className="tabs">
               {sessions.map((s) => (
@@ -279,6 +293,10 @@ export default function App() {
                 </button>
               </div>
             </section>
+
+            <div className="editrow">
+              <button className="link small" onClick={() => setEditing(true)}>✏️ Modifica esercizi</button>
+            </div>
 
             <ol className="exlist">
               {current.session_exercise.map((se) => (

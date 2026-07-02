@@ -17,8 +17,9 @@ export async function getBackboneSessions() {
   const { data, error } = await supabase
     .from('session_template')
     .select(
-      `code, name, target_duration_min, target_duration_max,
+      `id, code, name, target_duration_min, target_duration_max,
        session_exercise (
+         id,
          order_index,
          prescription,
          exercise (
@@ -72,6 +73,37 @@ export async function saveSession(payload) {
   }
 
   return dayLog
+}
+
+// ── Modifica del programma (esercizi delle sedute) ──────────────────
+export async function updateExercise(id, fields) {
+  const { error } = await supabase.from('exercise').update(fields).eq('id', id)
+  if (error) throw error
+}
+
+export async function updateSessionExercise(id, fields) {
+  const { error } = await supabase.from('session_exercise').update(fields).eq('id', id)
+  if (error) throw error
+}
+
+export async function addSessionExercise(sessionTemplateId, { name, prescription, cue, order_index, progression_type = 'load' }) {
+  const { data: ex, error: e1 } = await supabase
+    .from('exercise')
+    .insert({ name, cue: cue || null, progression_type })
+    .select()
+    .single()
+  if (e1) throw e1
+  const { error: e2 } = await supabase
+    .from('session_exercise')
+    .insert({ session_template_id: sessionTemplateId, exercise_id: ex.id, order_index, prescription: prescription || null })
+  if (e2) throw e2
+}
+
+// Rimuove solo il legame con la seduta (l'esercizio in libreria resta, così
+// non si rompono eventuali log passati che lo referenziano).
+export async function removeSessionExercise(sessionExerciseId) {
+  const { error } = await supabase.from('session_exercise').delete().eq('id', sessionExerciseId)
+  if (error) throw error
 }
 
 // Schede di mobilità/stretching (per contesto e fase).
