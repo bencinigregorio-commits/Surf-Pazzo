@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import {
   isoDate, weekRange, WEEKDAYS, activityLabel,
   computeWeekStatus, buildPlan, CODE_LABEL,
 } from './week'
 import { FATIGUE_META, fatigueScore } from './recovery'
 import { Icon } from './Icons'
+
+const dayTitle = (iso) =>
+  new Date(iso + 'T00:00:00').toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: 'long' })
 
 // Icona (neon personalizzata) per ogni tipo di attività.
 const ACT_ICON = {
@@ -37,9 +41,10 @@ const CHECKINS = [
 export default function WeekView({
   weekLogs, days, fatigue, deload, checkin, activeRegions,
   tripDate, tripPhase, sessionsByCode,
-  onSetTripDate, onOpenSessionLog, onQuickLog, onCheckin,
+  onSetTripDate, onOpenSessionLog, onQuickLog, onCheckin, onDeleteLog,
 }) {
   const todayIso = isoDate(new Date())
+  const [selIso, setSelIso] = useState(todayIso)
   const byDate = {}
   for (const l of weekLogs) (byDate[l.log_date] ??= []).push(l)
 
@@ -60,7 +65,7 @@ export default function WeekView({
 
       <FatigueCard fatigue={fatigue} deload={deload} checkin={checkin} activeRegions={activeRegions} onCheckin={onCheckin} />
 
-      {/* Striscia settimana */}
+      {/* Striscia settimana (tocca un giorno per vederne/rimuoverne le attività) */}
       <div className="weekstrip">
         {days.map((d, i) => {
           const iso = isoDate(d)
@@ -68,7 +73,11 @@ export default function WeekView({
           const isToday = iso === todayIso
           const planned = planByIso[iso]?.planned
           return (
-            <div key={iso} className={'wday' + (isToday ? ' wday--today' : '')}>
+            <button
+              key={iso}
+              className={'wday' + (isToday ? ' wday--today' : '') + (iso === selIso ? ' wday--sel' : '')}
+              onClick={() => setSelIso(iso)}
+            >
               <span className="wdname">{WEEKDAYS[i]}</span>
               <span className="wdnum">{d.getDate()}</span>
               <div className="wdacts">
@@ -79,10 +88,34 @@ export default function WeekView({
                   <Icon name={ACT_ICON[planned] ?? (planned === 'cardio' ? 'corsa' : planned === 'mobility' ? 'mobilita' : 'training')} size={18} className="wdico wdico--plan" />
                 )}
               </div>
-            </div>
+            </button>
           )
         })}
       </div>
+
+      {/* Dettaglio del giorno selezionato: rimuovi attività */}
+      <section className="card daydetail">
+        <div className="card-head">
+          <h2 className="card-title">{dayTitle(selIso)}</h2>
+        </div>
+        {(byDate[selIso] ?? []).length === 0 ? (
+          <p className="muted small">Niente registrato in questo giorno.</p>
+        ) : (
+          <ul className="loglist">
+            {(byDate[selIso] ?? []).map((l) => (
+              <li key={l.id} className="logitem">
+                <Icon name={l.status === 'rest' ? 'riposo' : ACT_ICON[l.session_code] ?? 'training'} size={18} className="wdico" />
+                <span className="logdate">{activityLabel(l)}</span>
+                <span className="logmeta">
+                  {l.session_rpe ? `RPE ${l.session_rpe}` : ''}
+                  {l.exercise_count ? ` · ${l.exercise_count} es.` : ''}
+                </span>
+                <button className="logdel" onClick={() => onDeleteLog(l.id)}>rimuovi</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <ProgressCard status={status} />
 

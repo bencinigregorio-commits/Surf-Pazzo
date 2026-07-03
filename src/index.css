@@ -967,6 +967,23 @@ body {
 .vidbtn:hover { background: rgba(248,113,113,0.18); }
 .vidbtn svg { color: #f87171; }
 
+/* Giorno cliccabile + dettaglio con rimozione */
+.wday { font: inherit; color: inherit; text-align: center; cursor: pointer; width: 100%; }
+.wday--sel { background: rgba(34,211,238,0.12); border-color: rgba(34,211,238,0.5); }
+.daydetail .card-title { text-transform: capitalize; letter-spacing: 0; font-size: 15px; color: #d6e3f0; }
+.daydetail .logmeta { margin-left: 8px; }
+.logdel {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #fca5a5;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.logdel:hover { color: #f87171; }
+
 /* Icone personalizzate (neon) dell'utente */
 .tabbar-ico { opacity: 0.5; transition: opacity 0.15s ease; }
 .tabbar-btn--on .tabbar-ico { opacity: 1; }

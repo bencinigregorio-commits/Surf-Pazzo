@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   getBackboneSessions, getProgressionData, getWeekLogs, getLatestCheckin,
   getTripConfig, setTripDate, saveSession, saveCheckin,
-  getBiaScans, addBiaScan, getGoalPhase, setGoalPhase, getMobility,
+  getBiaScans, addBiaScan, getGoalPhase, setGoalPhase, getMobility, deleteDayLog,
 } from './queries'
 import { computeSuggestion, lastLogSummary, SUGGEST_META } from './progression'
 import { computeWeeklyLoad, fatigueState, deloadAdvice, computeActivePain } from './recovery'
@@ -123,7 +123,7 @@ export default function App() {
       await saveSession({
         session_code: code === '__rest__' ? null : code,
         status: code === '__rest__' ? 'rest' : 'done',
-        log_date: TODAY_ISO,
+        log_date: isoDate(new Date()),
       })
       refreshData()
       showToast('Segnato per oggi ✓')
@@ -137,6 +137,17 @@ export default function App() {
       await saveCheckin(s)
       refreshData()
       showToast('Sensazione registrata ✓')
+    } catch (e) {
+      showToast('Errore: ' + (e.message ?? e))
+    }
+  }
+
+  async function deleteLog(id) {
+    if (!window.confirm('Rimuovere questa attività registrata?')) return
+    try {
+      await deleteDayLog(id)
+      refreshData()
+      showToast('Rimosso ✓')
     } catch (e) {
       showToast('Errore: ' + (e.message ?? e))
     }
@@ -241,6 +252,7 @@ export default function App() {
             onOpenSessionLog={openSessionLog}
             onQuickLog={quickLog}
             onCheckin={doCheckin}
+            onDeleteLog={deleteLog}
           />
         )}
 

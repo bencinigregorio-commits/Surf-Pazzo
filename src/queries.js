@@ -178,6 +178,12 @@ export async function getLatestCheckin() {
   return data?.[0] ?? null
 }
 
+// Rimuove un'attività registrata (e i suoi esercizi, via cascade).
+export async function deleteDayLog(id) {
+  const { error } = await supabase.from('day_log').delete().eq('id', id)
+  if (error) throw error
+}
+
 // Attività registrate in un intervallo di date (per la vista settimana).
 export async function getWeekLogs(startISO, endISO) {
   const { data, error } = await supabase
