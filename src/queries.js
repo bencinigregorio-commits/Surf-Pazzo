@@ -110,7 +110,7 @@ export async function removeSessionExercise(sessionExerciseId) {
 export async function getMobility() {
   const { data, error } = await supabase
     .from('mobility_exercise')
-    .select('context, phase, order_index, name, prescription, cue, youtube_term')
+    .select('context, phase, order_index, name, prescription, cue, youtube_term, priorita')
   if (error) throwIfMissingTables(error)
   return data ?? []
 }

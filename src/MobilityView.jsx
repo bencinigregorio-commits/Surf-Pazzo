@@ -62,7 +62,14 @@ function MobBlock({ title, items }) {
                 <span className="exname">{it.name}</span>
                 {it.prescription && <span className="exresc">{it.prescription}</span>}
               </div>
-              {it.cue && <div className="exmeta"><span className="excue">{it.cue}</span></div>}
+              <div className="exmeta">
+                {it.priorita && (
+                  <span className={'pill ' + (it.priorita === 'Essenziale' ? 'pill--ess' : 'pill--util')}>
+                    {it.priorita}
+                  </span>
+                )}
+                {it.cue && <span className="excue">{it.cue}</span>}
+              </div>
               <VideoButton term={it.youtube_term} name={it.name} />
             </li>
           ))}
