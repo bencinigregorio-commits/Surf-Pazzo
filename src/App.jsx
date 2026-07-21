@@ -304,7 +304,9 @@ export default function App() {
                 <span className="hero-pill">
                   {current.is_maintenance ? 'MANTENIMENTO' : `PALESTRA ${current.code}`}
                 </span>
-                <h2 className="hero-h">{current.name.replace(/^(Palestra [ABC]|Campagna) — /, '')}</h2>
+                <h2 className="hero-h">
+                  {current.is_maintenance ? 'Campagna' : current.name.replace(/^Palestra [ABC] — /, '')}
+                </h2>
                 <p className="hero-sub">{FOCUS_SUB[current.code]} · {current.session_exercise.length} esercizi</p>
                 <button className="hero-cta" onClick={() => setLogging(true)}>
                   Registra seduta<Icon name="chevron" size={20} />
