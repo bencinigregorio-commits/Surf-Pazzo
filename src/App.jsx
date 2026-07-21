@@ -30,7 +30,11 @@ const FOCUS_SUB = {
   A: 'Forza gambe · Core · Pop-up power',
   B: 'Pagaiata · Spalla · Resistenza',
   C: 'Equilibrio · Rotazione · Atletismo',
+  campagna: 'Tenuta · Pagaiata · Pop-up · Attrezzatura minima',
 }
+
+// Etichetta breve per le linguette delle sedute
+const TAB_LABEL = { A: 'A', B: 'B', C: 'C', campagna: 'Camp.' }
 
 export default function App() {
   const [state, setState] = useState('loading') // loading | empty | error | ready
@@ -287,7 +291,7 @@ export default function App() {
                   className={'tab' + (s.code === active ? ' tab--on' : '')}
                   onClick={() => setActive(s.code)}
                 >
-                  {s.code}
+                  {TAB_LABEL[s.code] ?? s.code}
                 </button>
               ))}
             </div>
@@ -297,8 +301,10 @@ export default function App() {
                 <Icon name="forza" size={150} className="hero-wavebg-ico" />
               </div>
               <div className="hero-body">
-                <span className="hero-pill">PALESTRA {current.code}</span>
-                <h2 className="hero-h">{current.name.replace(/^Palestra [ABC] — /, '')}</h2>
+                <span className="hero-pill">
+                  {current.is_maintenance ? 'MANTENIMENTO' : `PALESTRA ${current.code}`}
+                </span>
+                <h2 className="hero-h">{current.name.replace(/^(Palestra [ABC]|Campagna) — /, '')}</h2>
                 <p className="hero-sub">{FOCUS_SUB[current.code]} · {current.session_exercise.length} esercizi</p>
                 <button className="hero-cta" onClick={() => setLogging(true)}>
                   Registra seduta<Icon name="chevron" size={20} />
@@ -323,7 +329,18 @@ export default function App() {
                     </span>
                     {se.exercise.cue && <span className="excue">{se.exercise.cue}</span>}
                   </div>
-                  <ProgBadge exercise={se.exercise} history={progByEx[se.exercise.id]} ctx={suggestCtx} />
+                  {current.is_maintenance ? (
+                    <div className="prog">
+                      <div className="prog-line">
+                        <span className="sgbadge sg-keep">Mantenimento</span>
+                        <span className="prog-hint">
+                          Seduta di tenuta: non tocca le progressioni del programma.
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <ProgBadge exercise={se.exercise} history={progByEx[se.exercise.id]} ctx={suggestCtx} />
+                  )}
                   <div className="exvideo"><VideoButton term={se.exercise.youtube_term} name={se.exercise.name} /></div>
                   <AlternativeBlock alternatives={se.exercise.exercise_alternative} />
                 </li>

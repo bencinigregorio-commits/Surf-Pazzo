@@ -81,16 +81,19 @@ export function computeWeekStatus(logs) {
   const mobilita = new Set()
   const balance = new Set()
   let cardio = 0
+  let campagna = 0 // seduta di mantenimento: conta come portante (per volta, non per tipo)
   for (const l of logs) {
     if (l.status === 'rest') continue
     const c = l.session_code
-    if (c === 'A' || c === 'B' || c === 'C') backbone.add(c)
+    if (c === 'campagna') campagna++
+    else if (c === 'A' || c === 'B' || c === 'C') backbone.add(c)
     else if (c === 'mobilita') mobilita.add(l.log_date)
     else if (c === 'balance') balance.add(l.log_date)
     else if (c === 'corsa' || c === 'calcetto') cardio++
   }
   const s = {
-    portanti: backbone.size,
+    // Le sedute Campagna contano come portanti (3 Campagna = settimana "standard").
+    portanti: Math.min(3, backbone.size + campagna),
     mobilitaDays: mobilita.size,
     balanceDays: balance.size,
     cardio,
@@ -150,7 +153,7 @@ export function buildPlan(logs, days, todayIso) {
   // Cosa è registrato in ogni giorno (priorità: portante > cardio > libero > mobilità).
   const assigned = weekIso.map((iso) => {
     const dl = byDate[iso] ?? []
-    const portante = dl.find((l) => ['A', 'B', 'C'].includes(l.session_code))
+    const portante = dl.find((l) => ['A', 'B', 'C', 'campagna'].includes(l.session_code))
     if (portante) return portante.session_code
     if (dl.some((l) => ['corsa', 'calcetto'].includes(l.session_code))) return 'cardio'
     if (dl.some((l) => l.status === 'rest')) return 'free'

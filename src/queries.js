@@ -17,7 +17,7 @@ export async function getBackboneSessions() {
   const { data, error } = await supabase
     .from('session_template')
     .select(
-      `id, code, name, target_duration_min, target_duration_max,
+      `id, code, name, target_duration_min, target_duration_max, is_maintenance,
        session_exercise (
          id,
          order_index,
@@ -28,11 +28,11 @@ export async function getBackboneSessions() {
          )
        )`
     )
-    .in('code', ['A', 'B', 'C'])
+    .in('code', ['A', 'B', 'C', 'campagna'])
 
   if (error) throwIfMissingTables(error)
 
-  const order = { A: 0, B: 1, C: 2 }
+  const order = { A: 0, B: 1, C: 2, campagna: 3 }
   return (data ?? [])
     .sort((a, b) => order[a.code] - order[b.code])
     .map((s) => ({

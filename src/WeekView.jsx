@@ -11,7 +11,7 @@ const dayTitle = (iso) =>
 
 // Icona (neon personalizzata) per ogni tipo di attività.
 const ACT_ICON = {
-  A: 'forza', B: 'forza', C: 'forza',
+  A: 'forza', B: 'forza', C: 'forza', campagna: 'forza',
   corsa: 'corsa', calcetto: 'ball', mobilita: 'mobilita',
   balance: 'balance', recovery: 'recupero', rest: 'riposo',
 }
@@ -123,10 +123,15 @@ export default function WeekView({
       <section className="card actcard">
         <h2 className="card-title">Aggiungi attività</h2>
         <div className="actgrid">
-          {['A', 'B', 'C'].map((code) => (
-            <button key={code} className="actbtn actbtn--gym" onClick={() => onOpenSessionLog(code)}>
+          {[
+            { code: 'A', label: 'Forza A' },
+            { code: 'B', label: 'Forza B' },
+            { code: 'C', label: 'Forza C' },
+            { code: 'campagna', label: 'Campagna' },
+          ].map((g) => (
+            <button key={g.code} className="actbtn actbtn--gym" onClick={() => onOpenSessionLog(g.code)}>
               <Icon name="forza" size={26} />
-              <span>Forza {code}</span>
+              <span>{g.label}</span>
             </button>
           ))}
           {QUICK.map((q) => (

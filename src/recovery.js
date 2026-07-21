@@ -1,7 +1,7 @@
 // Fatica / recupero e dolore (Fetta 5). Volutamente semplice (niente TSS/ACWR).
 
 // Peso "di fatica" per tipo di attività.
-const PESO_TIPO = { A: 3, B: 3, C: 3, calcetto: 3, corsa: 1, mobilita: 0, balance: 0, recovery: 0 }
+const PESO_TIPO = { A: 3, B: 3, C: 3, campagna: 3, calcetto: 3, corsa: 1, mobilita: 0, balance: 0, recovery: 0 }
 // Banda di intensità in base all'RPE di seduta.
 function bandaRPE(rpe) {
   if (rpe == null) return 1.5 // dato mancante: intensità media, prudente
