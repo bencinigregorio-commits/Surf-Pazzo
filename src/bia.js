@@ -17,13 +17,19 @@ export const ESSENTIALS = [
   { key: 'phase_angle', label: 'Angolo di fase', unit: '°' },
 ]
 
-const byDateDesc = (a, b) => (b.scan_date ?? '').localeCompare(a.scan_date ?? '')
+// Dalla più recente. A parità di data, conta l'ora di inserimento.
+const byDateDesc = (a, b) =>
+  (b.scan_date ?? '').localeCompare(a.scan_date ?? '') ||
+  (b.created_at ?? '').localeCompare(a.created_at ?? '')
 
 // Ultima scansione + delta rispetto alla precedente confrontabile.
 export function computeTrend(scans) {
-  const comp = scans.filter((s) => s.comparable).sort(byDateDesc)
-  const latest = comp[0] ?? null
-  const prev = comp[1] ?? null
+  const all = [...scans].sort(byDateDesc)
+  const comp = all.filter((s) => s.comparable)
+  // I valori mostrati sono SEMPRE quelli dell'ultima scansione.
+  const latest = all[0] ?? null
+  // Le variazioni si calcolano solo tra misure confrontabili.
+  const prev = latest?.comparable ? comp.filter((s) => s !== latest)[0] ?? null : null
   const deltas = {}
   if (latest && prev) {
     for (const e of ESSENTIALS) {
