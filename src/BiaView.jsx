@@ -169,12 +169,11 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
       )}
 
       <div className="biafoto">
-        <label className="field-label">📷 Foto della scansione (consigliata)</label>
+        <label className="field-label">📷 Foto o screenshot della scansione (consigliato)</label>
         <input
           className="input"
           type="file"
           accept="image/*"
-          capture="environment"
           onChange={(e) => scegliFoto(e.target.files?.[0])}
         />
         {anteprima && <img className="biafoto-preview" src={anteprima} alt="anteprima BIA" />}
