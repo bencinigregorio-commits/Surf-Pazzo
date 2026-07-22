@@ -30,6 +30,8 @@ export function activityLabel(log) {
     C: '🏋️ Palestra C',
     corsa: '🏃 Corsa',
     calcetto: '⚽ Calcetto',
+    beachvolley: '🏐 Beach volley',
+    campagna: '🏕️ Campagna',
     mobilita: '🧘 Mobilità',
     balance: '🛹 Balance',
     recovery: '♻️ Recupero',
@@ -89,7 +91,7 @@ export function computeWeekStatus(logs) {
     else if (c === 'A' || c === 'B' || c === 'C') backbone.add(c)
     else if (c === 'mobilita') mobilita.add(l.log_date)
     else if (c === 'balance') balance.add(l.log_date)
-    else if (c === 'corsa' || c === 'calcetto') cardio++
+    else if (c === 'corsa' || c === 'calcetto' || c === 'beachvolley') cardio++
   }
   const s = {
     // Le sedute Campagna contano come portanti (3 Campagna = settimana "standard").
@@ -155,7 +157,7 @@ export function buildPlan(logs, days, todayIso) {
     const dl = byDate[iso] ?? []
     const portante = dl.find((l) => ['A', 'B', 'C', 'campagna'].includes(l.session_code))
     if (portante) return portante.session_code
-    if (dl.some((l) => ['corsa', 'calcetto'].includes(l.session_code))) return 'cardio'
+    if (dl.some((l) => ['corsa', 'calcetto', 'beachvolley'].includes(l.session_code))) return 'cardio'
     if (dl.some((l) => l.status === 'rest')) return 'free'
     if (dl.some((l) => ['mobilita', 'balance', 'recovery'].includes(l.session_code))) return 'mobility'
     return null

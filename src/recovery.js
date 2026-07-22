@@ -1,7 +1,8 @@
 // Fatica / recupero e dolore (Fetta 5). Volutamente semplice (niente TSS/ACWR).
+import { fattoreDurata } from './calories.js'
 
 // Peso "di fatica" per tipo di attività.
-const PESO_TIPO = { A: 3, B: 3, C: 3, campagna: 3, calcetto: 3, corsa: 1, mobilita: 0, balance: 0, recovery: 0 }
+const PESO_TIPO = { A: 3, B: 3, C: 3, campagna: 3, calcetto: 3, beachvolley: 3, corsa: 1, mobilita: 0, balance: 0, recovery: 0 }
 // Banda di intensità in base all'RPE di seduta.
 function bandaRPE(rpe) {
   if (rpe == null) return 1.5 // dato mancante: intensità media, prudente
@@ -21,13 +22,14 @@ export const FATIGUE_META = {
 }
 
 // Carico settimanale = somma su tutte le attività della settimana.
+// La durata pesa: mezz'ora di calcetto conta meno di due ore.
 export function computeWeeklyLoad(weekLogs) {
   let load = 0
   for (const l of weekLogs) {
     if (l.status === 'rest') continue
     const peso = PESO_TIPO[l.session_code] ?? 0
     if (peso === 0) continue
-    load += peso * bandaRPE(l.session_rpe)
+    load += peso * bandaRPE(l.session_rpe) * fattoreDurata(l.session_code, l.duration_min)
   }
   return Math.round(load * 10) / 10
 }

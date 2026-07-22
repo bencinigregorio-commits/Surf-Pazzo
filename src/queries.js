@@ -54,6 +54,10 @@ export async function saveSession(payload) {
     status: day.status ?? 'done',
     session_rpe: day.session_rpe ?? null,
     notes: day.notes ?? null,
+    duration_min: day.duration_min ?? null,
+    distance_km: day.distance_km ?? null,
+    avg_hr: day.avg_hr ?? null,
+    calories: day.calories ?? null,
   }
   if (day.log_date) record.log_date = day.log_date
 
@@ -188,7 +192,7 @@ export async function deleteDayLog(id) {
 export async function getWeekLogs(startISO, endISO) {
   const { data, error } = await supabase
     .from('day_log')
-    .select('id, log_date, session_code, status, session_rpe, exercise_log(id)')
+    .select('id, log_date, session_code, status, session_rpe, duration_min, distance_km, avg_hr, calories, exercise_log(id)')
     .gte('log_date', startISO)
     .lte('log_date', endISO)
     .order('log_date', { ascending: true })
@@ -226,7 +230,7 @@ export async function getProgressionData() {
 export async function getRecentLogs() {
   const { data, error } = await supabase
     .from('day_log')
-    .select('id, log_date, session_code, status, session_rpe, exercise_log(id)')
+    .select('id, log_date, session_code, status, session_rpe, duration_min, distance_km, avg_hr, calories, exercise_log(id)')
     .order('log_date', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(10)

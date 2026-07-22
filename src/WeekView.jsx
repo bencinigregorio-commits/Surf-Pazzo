@@ -12,7 +12,7 @@ const dayTitle = (iso) =>
 // Icona (neon personalizzata) per ogni tipo di attività.
 const ACT_ICON = {
   A: 'forza', B: 'forza', C: 'forza', campagna: 'forza',
-  corsa: 'corsa', calcetto: 'ball', mobilita: 'mobilita',
+  corsa: 'corsa', calcetto: 'ball', beachvolley: 'ball', mobilita: 'mobilita',
   balance: 'balance', recovery: 'recupero', rest: 'riposo',
 }
 
@@ -26,6 +26,7 @@ const SESSION_FOCUS = {
 const QUICK = [
   { code: 'corsa', label: 'Corsa', icon: 'corsa' },
   { code: 'calcetto', label: 'Calcetto', icon: 'ball' },
+  { code: 'beachvolley', label: 'Beach volley', icon: 'ball' },
   { code: 'mobilita', label: 'Mobilità', icon: 'mobilita' },
   { code: 'balance', label: 'Balance', icon: 'balance' },
   { code: 'recovery', label: 'Recupero', icon: 'recupero' },
@@ -107,8 +108,14 @@ export default function WeekView({
                 <Icon name={l.status === 'rest' ? 'riposo' : ACT_ICON[l.session_code] ?? 'training'} size={18} className="wdico" />
                 <span className="logdate">{activityLabel(l)}</span>
                 <span className="logmeta">
-                  {l.session_rpe ? `RPE ${l.session_rpe}` : ''}
-                  {l.exercise_count ? ` · ${l.exercise_count} es.` : ''}
+                  {[
+                    l.duration_min ? `${l.duration_min}'` : null,
+                    l.distance_km ? `${l.distance_km} km` : null,
+                    l.avg_hr ? `${l.avg_hr} bpm` : null,
+                    l.calories ? `${Math.round(l.calories)} kcal` : null,
+                    l.session_rpe ? `RPE ${l.session_rpe}` : null,
+                    l.exercise_count ? `${l.exercise_count} es.` : null,
+                  ].filter(Boolean).join(' · ')}
                 </span>
                 <button className="logdel" onClick={() => onDeleteLog(l.id)}>rimuovi</button>
               </li>
@@ -117,7 +124,7 @@ export default function WeekView({
         )}
       </section>
 
-      <ProgressCard status={status} />
+      <ProgressCard status={status} kcal={weekLogs.reduce((a, l) => a + (Number(l.calories) || 0), 0)} />
 
       {/* Aggiungi attività */}
       <section className="card actcard">
@@ -269,7 +276,7 @@ function FatigueCard({ fatigue, deload, checkin, activeRegions, onCheckin }) {
 }
 
 /* ---------- Progresso settimana ---------- */
-function ProgressCard({ status }) {
+function ProgressCard({ status, kcal }) {
   const { s, currentTier } = status
   const cells = [
     { label: 'Portanti', val: s.portanti, tot: 3 },
@@ -281,7 +288,10 @@ function ProgressCard({ status }) {
     <section className="card">
       <div className="card-head">
         <h2 className="card-title">Progresso settimana</h2>
-        <span className="muted small">{currentTier ? currentTier.name : `${s.portanti}/3 portanti`}</span>
+        <span className="muted small">
+          {currentTier ? currentTier.name : `${s.portanti}/3 portanti`}
+          {kcal ? ` · 🔥 ${Math.round(kcal)} kcal` : ''}
+        </span>
       </div>
       <div className="progrid">
         {cells.map((c) => (

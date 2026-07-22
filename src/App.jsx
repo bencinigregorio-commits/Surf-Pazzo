@@ -14,6 +14,8 @@ import BiaView from './BiaView'
 import MobilityView from './MobilityView'
 import Lock from './Lock'
 import EditSession from './EditSession'
+import QuickActivityForm from './QuickActivityForm'
+import { pesoDaBia } from './calories'
 import { Icon } from './Icons'
 import VideoButton from './VideoButton'
 
@@ -44,6 +46,7 @@ export default function App() {
   const [nav, setNav] = useState('week') // week | sessions
   const [logging, setLogging] = useState(false)
   const [editing, setEditing] = useState(false)
+  const [metricActivity, setMetricActivity] = useState(null) // corsa | calcetto | beachvolley
   const [toast, setToast] = useState('')
   const [progByEx, setProgByEx] = useState({})
   const [weekLogs, setWeekLogs] = useState([])
@@ -122,7 +125,14 @@ export default function App() {
     refreshData()
   }
 
+  // Attività con metriche (durata, distanza, battito, calorie): apre il modulo.
+  const CON_METRICHE = ['corsa', 'calcetto', 'beachvolley']
+
   async function quickLog(code) {
+    if (CON_METRICHE.includes(code)) {
+      setMetricActivity(code)
+      return
+    }
     try {
       await saveSession({
         session_code: code === '__rest__' ? null : code,
@@ -132,6 +142,23 @@ export default function App() {
       refreshData()
       showToast('Segnato per oggi ✓')
     } catch (e) {
+      showToast('Errore: ' + (e.message ?? e))
+    }
+  }
+
+  async function saveMetricActivity(fields) {
+    try {
+      await saveSession({
+        session_code: metricActivity,
+        status: 'done',
+        log_date: isoDate(new Date()),
+        ...fields,
+      })
+      setMetricActivity(null)
+      refreshData()
+      showToast('Attività registrata ✓')
+    } catch (e) {
+      setMetricActivity(null)
       showToast('Errore: ' + (e.message ?? e))
     }
   }
@@ -241,7 +268,16 @@ export default function App() {
           <LogForm session={current} onSaved={handleSaved} onCancel={() => setLogging(false)} />
         )}
 
-        {state === 'ready' && !logging && nav === 'week' && (
+        {state === 'ready' && metricActivity && (
+          <QuickActivityForm
+            code={metricActivity}
+            pesoKg={pesoDaBia(biaScans)}
+            onSave={saveMetricActivity}
+            onCancel={() => setMetricActivity(null)}
+          />
+        )}
+
+        {state === 'ready' && !logging && !metricActivity && nav === 'week' && (
           <WeekView
             weekLogs={weekLogs}
             days={days}
