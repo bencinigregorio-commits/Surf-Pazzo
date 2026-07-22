@@ -2,6 +2,7 @@ import { useState } from 'react'
 import {
   PHASES, ESSENTIALS, computeTrend, biaAlerts, suggestedPhase, daysSinceLastScan, isComparable,
 } from './bia'
+import { uploadBiaPhoto } from './queries'
 import { isoDate } from './week'
 
 const num = (v) => (v === '' || v == null ? null : Number(v))
@@ -70,6 +71,12 @@ export default function BiaView({ scans, goalPhase, preTrip, onAddScan, onSetPha
             ))}
           </div>
         )}
+        {latest?.photo_url && (
+          <a className="biafoto-link" href={latest.photo_url} target="_blank" rel="noreferrer">
+            <img className="biafoto-thumb" src={latest.photo_url} alt="foto scansione" />
+            <span className="muted small">📷 Apri la foto per tutti gli altri dati</span>
+          </a>
+        )}
         {latest && comparableCount < 2 && (
           <p className="muted small">Serve almeno una seconda scansione confrontabile per vedere il trend.</p>
         )}
@@ -95,6 +102,9 @@ export default function BiaView({ scans, goalPhase, preTrip, onAddScan, onSetPha
                   {s.weight != null ? `${s.weight} kg` : ''}
                   {s.fat_pct != null ? ` · ${s.fat_pct}%` : ''}
                   {!s.comparable ? ' · non confrontabile' : ''}
+                  {s.photo_url && (
+                    <> · <a href={s.photo_url} target="_blank" rel="noreferrer" className="link small">📷 foto</a></>
+                  )}
                 </span>
               </li>
             ))}
@@ -107,12 +117,28 @@ export default function BiaView({ scans, goalPhase, preTrip, onAddScan, onSetPha
 
 function AddScanForm({ scans, onAddScan, sinceLast }) {
   const [f, setF] = useState({ scan_date: TODAY })
+  const [foto, setFoto] = useState(null)
+  const [anteprima, setAnteprima] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }))
+
+  function scegliFoto(file) {
+    setFoto(file ?? null)
+    setAnteprima(file ? URL.createObjectURL(file) : null)
+  }
 
   async function save() {
     setSaving(true)
+    setError('')
+    let photo_url = null
+    try {
+      if (foto) photo_url = await uploadBiaPhoto(foto)
+    } catch (e) {
+      setError('Foto non caricata: ' + (e.message ?? e) + ' — salvo comunque i numeri.')
+    }
     const scan = {
+      photo_url,
       scan_date: f.scan_date || TODAY,
       device: f.device || null,
       conditions: f.conditions || null,
@@ -129,6 +155,8 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
     }
     await onAddScan(scan)
     setF({ scan_date: TODAY })
+    setFoto(null)
+    setAnteprima(null)
     setSaving(false)
   }
 
@@ -139,6 +167,21 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
       {sinceLast != null && sinceLast < 28 && (
         <p className="muted small">Hai una scansione di {sinceLast} giorni fa: più spesso è rumore, non informazione.</p>
       )}
+
+      <div className="biafoto">
+        <label className="field-label">📷 Foto della scansione (consigliata)</label>
+        <input
+          className="input"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={(e) => scegliFoto(e.target.files?.[0])}
+        />
+        {anteprima && <img className="biafoto-preview" src={anteprima} alt="anteprima BIA" />}
+        <p className="muted small">
+          Allega la foto e compila solo i 4 essenziali qui sotto: tutto il resto resta leggibile nella foto.
+        </p>
+      </div>
 
       <div className="grid2">
         <Field label="Data" type="date" value={f.scan_date} onChange={(v) => set('scan_date', v)} />
@@ -164,6 +207,8 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
         </div>
         <Field label="Note" value={f.notes} onChange={(v) => set('notes', v)} placeholder="opzionale" />
       </details>
+
+      {error && <p className="errdetail">{error}</p>}
 
       <div className="actions">
         <button className="btn-primary" onClick={save} disabled={saving}>

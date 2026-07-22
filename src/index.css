@@ -149,6 +149,23 @@ body {
 .bia-alert--info { background: rgba(96,165,250,0.12); color: #93c5fd; border: 1px solid rgba(96,165,250,0.3); }
 .bia-alert--good { background: rgba(34,197,94,0.12); color: #86efac; border: 1px solid rgba(34,197,94,0.3); }
 
+/* Foto della scansione BIA */
+.biafoto { margin-top: 12px; }
+.biafoto .input { padding: 10px; font-size: 13px; }
+.biafoto-preview,
+.biafoto-thumb {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  margin-top: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.25);
+}
+.biafoto-link { display: block; margin-top: 12px; text-decoration: none; }
+.biafoto-link .muted { display: block; margin-top: 6px; text-align: center; }
+
 .bia-add, .bia-more { margin-top: 16px; }
 .bia-add > summary, .bia-more > summary {
   cursor: pointer;

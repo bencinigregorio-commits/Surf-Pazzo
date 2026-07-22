@@ -130,6 +130,19 @@ export async function getBiaScans() {
   return data ?? []
 }
 
+// Carica la foto della BIA e restituisce il link pubblico.
+export async function uploadBiaPhoto(file) {
+  const ext = (file.name?.split('.').pop() || 'jpg').toLowerCase()
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`
+  const { error } = await supabase.storage.from('bia').upload(path, file, {
+    cacheControl: '3600',
+    upsert: false,
+    contentType: file.type || 'image/jpeg',
+  })
+  if (error) throw error
+  return supabase.storage.from('bia').getPublicUrl(path).data.publicUrl
+}
+
 export async function addBiaScan(scan) {
   const { error } = await supabase.from('bia_scan').insert(scan)
   if (error) throwIfMissingTables(error)
