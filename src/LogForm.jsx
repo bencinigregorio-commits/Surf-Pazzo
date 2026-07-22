@@ -14,6 +14,32 @@ const PAIN_REGIONS = [
 // Converte testo in numero, oppure null se vuoto.
 const num = (v) => (v === '' || v == null ? null : Number(v))
 
+// Quali indicatori ha senso chiedere, per tipo di esercizio.
+// (il vogatore non chiede kg, il pop-up non chiede carico, ecc.)
+const CAMPI_PER_TIPO = {
+  load: ['load', 'sets', 'reps', 'rpe', 'quality'],
+  ballistic: ['sets', 'reps', 'load', 'rpe', 'quality'],
+  skill: ['sets', 'reps', 'duration', 'quality', 'variant'],
+  endurance: ['duration', 'distance', 'rpe'],
+}
+
+const DEF_CAMPO = {
+  load: { label: 'Carico (kg)', type: 'number' },
+  sets: { label: 'Serie', type: 'number' },
+  reps: { label: 'Reps', type: 'text', placeholder: 'es. 10' },
+  rpe: { label: 'RPE (1-10)', type: 'number' },
+  quality: { label: 'Qualità (1-5)', type: 'number' },
+  duration: { label: 'Durata (min)', type: 'number' },
+  distance: { label: 'Distanza (m)', type: 'number' },
+  variant: { label: 'Variante / livello', type: 'text', placeholder: 'es. livello 3' },
+}
+
+const TIPO_NOTA = {
+  endurance: 'Resistenza: conta il volume (durata/distanza), non il carico.',
+  skill: 'Tecnica: conta la qualità e la variante, non il peso.',
+  ballistic: 'Balistico: prima gesto pulito e veloce, poi eventuale carico.',
+}
+
 export default function LogForm({ session, onSaved, onCancel }) {
   const [sessionRpe, setSessionRpe] = useState(null)
   // Stato per esercizio: { done, expanded, load, sets, reps, rpe, quality, pain_region, pain_severity, notes }
@@ -40,7 +66,8 @@ export default function LogForm({ session, onSaved, onCancel }) {
         .map((se) => {
           const r = rows[se.exercise.id]
           const hasDetail =
-            r.load || r.sets || r.reps || r.rpe || r.quality || r.pain_region || r.notes
+            r.load || r.sets || r.reps || r.rpe || r.quality ||
+            r.duration || r.distance || r.variant || r.pain_region || r.notes
           if (!r.done && !hasDetail) return null
           return {
             exercise_id: se.exercise.id,
@@ -50,6 +77,9 @@ export default function LogForm({ session, onSaved, onCancel }) {
             reps: r.reps || null,
             rpe: num(r.rpe),
             technical_quality: num(r.quality),
+            duration_min: num(r.duration),
+            distance_m: num(r.distance),
+            variant: r.variant || null,
             pain_region: r.pain_region || null,
             pain_severity: r.pain_region ? num(r.pain_severity ?? 0) : null,
             notes: r.notes || null,
@@ -120,12 +150,22 @@ export default function LogForm({ session, onSaved, onCancel }) {
 
               {r.expanded && (
                 <div className="details">
+                  {TIPO_NOTA[se.exercise.progression_type] && (
+                    <p className="muted small" style={{ marginBottom: 8 }}>
+                      {TIPO_NOTA[se.exercise.progression_type]}
+                    </p>
+                  )}
                   <div className="grid2">
-                    <Field label="Carico (kg)" value={r.load} onChange={(v) => update(id, { load: v })} type="number" />
-                    <Field label="Serie" value={r.sets} onChange={(v) => update(id, { sets: v })} type="number" />
-                    <Field label="Reps" value={r.reps} onChange={(v) => update(id, { reps: v })} placeholder="es. 10" />
-                    <Field label="RPE (1-10)" value={r.rpe} onChange={(v) => update(id, { rpe: v })} type="number" />
-                    <Field label="Qualità (1-5)" value={r.quality} onChange={(v) => update(id, { quality: v })} type="number" />
+                    {(CAMPI_PER_TIPO[se.exercise.progression_type] ?? CAMPI_PER_TIPO.load).map((k) => (
+                      <Field
+                        key={k}
+                        label={DEF_CAMPO[k].label}
+                        type={DEF_CAMPO[k].type}
+                        placeholder={DEF_CAMPO[k].placeholder}
+                        value={r[k]}
+                        onChange={(v) => update(id, { [k]: v })}
+                      />
+                    ))}
                     <div className="field">
                       <label className="field-label">Dolore</label>
                       <select

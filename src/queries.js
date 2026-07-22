@@ -209,7 +209,7 @@ export async function getProgressionData() {
   const { data, error } = await supabase
     .from('exercise_log')
     .select(
-      'exercise_id, completed, load, sets, reps, rpe, technical_quality, pain_region, pain_severity, day_log ( log_date )'
+      'exercise_id, completed, load, sets, reps, rpe, technical_quality, duration_min, distance_m, variant, pain_region, pain_severity, day_log ( log_date )'
     )
     .limit(500)
 

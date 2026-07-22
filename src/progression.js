@@ -115,7 +115,14 @@ function baseSuggestion(exercise, history, todayIso, ctx) {
   // 4) Resistenza: progressione per volume/tempo (~+10%).
   if (type === 'endurance') {
     if (last.completed === 'full' && (last.rpe == null || last.rpe <= 7)) {
-      return { code: 'PROGREDISCI', hint: '+~10% di volume o durata.', last }
+      // Se conosco il volume dell'ultima volta, propongo il numero preciso (+10%).
+      const target =
+        last.distance_m != null
+          ? `prova ${Math.round((last.distance_m * 1.1) / 10) * 10} m`
+          : last.duration_min != null
+          ? `prova ${Math.round(last.duration_min * 1.1)} min`
+          : 'aumenta di ~10% volume o durata'
+      return { code: 'PROGREDISCI', hint: `+~10%: ${target}.`, last }
     }
     return { code: 'MANTIENI', hint: 'Mantieni il volume di questa volta.', last }
   }
@@ -149,6 +156,9 @@ export function lastLogSummary(last) {
   if (last.load != null) parts.push(`${last.load} kg`)
   if (last.reps) parts.push(`× ${last.reps}`)
   if (last.sets) parts.push(`${last.sets} serie`)
+  if (last.duration_min != null) parts.push(`${last.duration_min}'`)
+  if (last.distance_m != null) parts.push(`${last.distance_m} m`)
+  if (last.variant) parts.push(last.variant)
   if (last.rpe != null) parts.push(`RPE ${last.rpe}`)
   if (last.technical_quality != null) parts.push(`qualità ${last.technical_quality}`)
   return parts.length ? parts.join(' · ') : null
