@@ -44,7 +44,14 @@ export default function BiaView({ scans, goalPhase, preTrip, onAddScan, onSetPha
             </button>
           ))}
         </div>
-        {phaseHint && <p className="bia-suggest">💡 {phaseHint}</p>}
+        {phaseHint && (
+          <div className="bia-suggest">
+            <span>💡 {phaseHint.text}</span>
+            <button className="link small" onClick={() => onSetPhase(phaseHint.phase)}>
+              Passa a {PHASES.find((p) => p.key === phaseHint.phase)?.label}
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Essenziali ultima scansione */}

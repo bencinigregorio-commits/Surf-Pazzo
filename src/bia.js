@@ -66,13 +66,29 @@ export function biaAlerts(scans, goalPhase, preTrip) {
 }
 
 // L'app suggerisce (mai impone) un cambio di fase leggendo i trend.
+// Restituisce { phase, text } oppure null.
 export function suggestedPhase(scans, goalPhase) {
   const comp = scans.filter((s) => s.comparable).sort(byDateDesc)
-  if (goalPhase === 'asciugatura' && comp.length >= 3) {
-    const a = comp[0], c = comp[2]
-    if (a.fat_pct != null && c.fat_pct != null && Math.abs(a.fat_pct - c.fat_pct) < 0.3) {
-      return 'Grasso fermo da settimane in asciugatura: valuta una fase di mantenimento.'
-    }
+  if (comp.length < 3) return null
+  const a = comp[0], c = comp[2]
+  const dFat = a.fat_pct != null && c.fat_pct != null ? a.fat_pct - c.fat_pct : null
+  const dMus = a.smm != null && c.smm != null ? a.smm - c.smm : null
+
+  // Asciugatura che non "asciuga" più → mantenimento
+  if (goalPhase === 'asciugatura' && dFat != null && Math.abs(dFat) < 0.3) {
+    return { phase: 'mantenimento', text: 'Grasso fermo da settimane in asciugatura: valuta il mantenimento.' }
+  }
+  // Asciugatura che intacca la massa muscolare → mantenimento
+  if (goalPhase === 'asciugatura' && dMus != null && dMus < -0.5) {
+    return { phase: 'mantenimento', text: 'Stai perdendo massa muscolare in asciugatura: valuta il mantenimento e più proteine.' }
+  }
+  // Costruzione con grasso in forte salita → ricomposizione
+  if (goalPhase === 'costruzione' && dFat != null && dFat > 1.5) {
+    return { phase: 'ricomposizione', text: 'Il grasso sale parecchio in costruzione: valuta una ricomposizione.' }
+  }
+  // Mantenimento con grasso in salita costante → asciugatura
+  if (goalPhase === 'mantenimento' && dFat != null && dFat > 1.5) {
+    return { phase: 'asciugatura', text: 'Il grasso è in salita: potresti valutare una fase di asciugatura.' }
   }
   return null
 }

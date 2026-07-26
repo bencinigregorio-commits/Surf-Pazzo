@@ -4,6 +4,7 @@ import {
   computeWeekStatus, buildPlan, CODE_LABEL,
 } from './week'
 import { FATIGUE_META, fatigueScore } from './recovery'
+import { PHASES } from './bia'
 import { Icon } from './Icons'
 
 const dayTitle = (iso) =>
@@ -43,6 +44,7 @@ export default function WeekView({
   weekLogs, days, fatigue, deload, checkin, activeRegions,
   tripDate, tripPhase, sessionsByCode,
   onSetTripDate, onOpenSessionLog, onQuickLog, onCheckin, onDeleteLog,
+  phaseSuggestion, onApplyPhase,
 }) {
   const todayIso = isoDate(new Date())
   const [selIso, setSelIso] = useState(todayIso)
@@ -56,6 +58,18 @@ export default function WeekView({
   return (
     <div className="screen">
       {tripPhase.active && <TripBanner phase={tripPhase} tripDate={tripDate} onSetDate={onSetTripDate} />}
+
+      {phaseSuggestion && (
+        <div className="phasenudge">
+          <span className="phasenudge-ico">💡</span>
+          <div className="phasenudge-body">
+            <p>{phaseSuggestion.text}</p>
+            <button className="phasenudge-btn" onClick={() => onApplyPhase(phaseSuggestion.phase)}>
+              Passa a {PHASES.find((p) => p.key === phaseSuggestion.phase)?.label}
+            </button>
+          </div>
+        </div>
+      )}
 
       <TodayHero
         plan={plan}

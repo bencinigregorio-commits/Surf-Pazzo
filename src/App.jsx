@@ -7,6 +7,7 @@ import {
 import { computeSuggestion, lastLogSummary, SUGGEST_META } from './progression'
 import { computeWeeklyLoad, fatigueState, deloadAdvice, computeActivePain } from './recovery'
 import { computeTripPhase } from './trip'
+import { suggestedPhase } from './bia'
 import { adaptRest } from './rest'
 import { isoDate, weekRange } from './week'
 import LogForm from './LogForm'
@@ -104,6 +105,7 @@ export default function App() {
   const fatigue = useMemo(() => fatigueState(computeWeeklyLoad(weekLogs), checkin?.state), [weekLogs, checkin])
   const deload = deloadAdvice(fatigue.state, checkin?.state, activeRegions)
   const tripPhase = useMemo(() => computeTripPhase(tripDate, TODAY_ISO), [tripDate])
+  const phaseSuggestion = useMemo(() => suggestedPhase(biaScans, goalPhase), [biaScans, goalPhase])
   const suggestCtx = { weekFatigue: fatigue.state, activeRegions, preTrip: tripPhase.active, goalPhase }
 
   const current = sessions.find((s) => s.code === active)
@@ -232,7 +234,7 @@ export default function App() {
         </div>
         <div className="appbar-actions">
           {state === 'ready' && (
-            <button className="appbar-stats" onClick={() => setNav('corpo')} aria-label="Corpo">
+            <button className={'appbar-stats' + (phaseSuggestion ? ' appbar-stats--dot' : '')} onClick={() => setNav('corpo')} aria-label="Corpo">
               <Icon name="stats" size={24} />
             </button>
           )}
@@ -288,6 +290,8 @@ export default function App() {
             activeRegions={activeRegions}
             tripDate={tripDate}
             tripPhase={tripPhase}
+            phaseSuggestion={phaseSuggestion}
+            onApplyPhase={changeGoalPhase}
             sessionsByCode={Object.fromEntries(sessions.map((s) => [s.code, s]))}
             onSetTripDate={changeTripDate}
             onOpenSessionLog={openSessionLog}
