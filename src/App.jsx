@@ -7,6 +7,7 @@ import {
 import { computeSuggestion, lastLogSummary, SUGGEST_META } from './progression'
 import { computeWeeklyLoad, fatigueState, deloadAdvice, computeActivePain } from './recovery'
 import { computeTripPhase } from './trip'
+import { adaptRest } from './rest'
 import { isoDate, weekRange } from './week'
 import LogForm from './LogForm'
 import WeekView from './WeekView'
@@ -379,6 +380,15 @@ export default function App() {
                   ) : (
                     <ProgBadge exercise={se.exercise} history={progByEx[se.exercise.id]} ctx={suggestCtx} />
                   )}
+                  {!current.is_maintenance && (
+                    <RestBadge
+                      se={se}
+                      code={current.code}
+                      history={progByEx[se.exercise.id]}
+                      weekFatigue={fatigue.state}
+                      activeRegions={activeRegions}
+                    />
+                  )}
                   <div className="exvideo"><VideoButton term={se.exercise.youtube_term} name={se.exercise.name} /></div>
                   <AlternativeBlock alternatives={se.exercise.exercise_alternative} />
                 </li>
@@ -424,6 +434,31 @@ function ProgBadge({ exercise, history, ctx }) {
         <span className="prog-hint">{sug.hint}</span>
       </div>
       {summary && <p className="prog-last">Ultima volta: {summary}</p>}
+    </div>
+  )
+}
+
+// Recupero consigliato (base + adattamento per fatica/RPE/dolore).
+function RestBadge({ se, code, history, weekFatigue, activeRegions }) {
+  const exRegions = se.exercise.body_regions ?? []
+  const pain = (activeRegions ?? []).some((r) => exRegions.includes(r.region))
+  const lastRpe = history?.[0]?.rpe ?? null
+
+  const rest = adaptRest({
+    baseSeconds: se.rest_seconds,
+    baseLabel: se.rest_label,
+    code,
+    weekFatigue,
+    lastRpe,
+    pain,
+  })
+  if (!rest) return null
+
+  return (
+    <div className="rest">
+      <span className="rest-chip">⏱️ Recupero {rest.label}</span>
+      {rest.adattato && <span className="rest-base">base {rest.base}</span>}
+      {rest.note && <p className="rest-note">{rest.note}</p>}
     </div>
   )
 }

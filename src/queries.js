@@ -22,6 +22,8 @@ export async function getBackboneSessions() {
          id,
          order_index,
          prescription,
+         rest_seconds,
+         rest_label,
          exercise (
            id, name, progression_type, cue, default_reps, load_step, body_regions,
            exercise_alternative ( alt_name, alt_prescription, reason, order_index )
