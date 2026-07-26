@@ -147,6 +147,10 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
         fat_pct: got.fat_pct ?? p.fat_pct,
         lean_mass: got.lean_mass ?? p.lean_mass,
         phase_angle: got.phase_angle ?? p.phase_angle,
+        fat_mass: got.fat_mass ?? p.fat_mass,
+        tbw: got.tbw ?? p.tbw,
+        bmr: got.bmr ?? p.bmr,
+        visceral: got.visceral ?? p.visceral,
       }))
       const n = ['weight', 'fat_pct', 'lean_mass', 'phase_angle'].filter((k) => got[k] != null).length
       setOcrMsg(
