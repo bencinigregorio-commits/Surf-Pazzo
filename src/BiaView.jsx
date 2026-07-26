@@ -3,6 +3,7 @@ import {
   PHASES, ESSENTIALS, computeTrend, biaAlerts, suggestedPhase, daysSinceLastScan, isComparable,
 } from './bia'
 import { uploadBiaPhoto } from './queries'
+import { readImageText, parseBiaText } from './ocr'
 import { isoDate } from './week'
 
 const num = (v) => (v === '' || v == null ? null : Number(v))
@@ -121,11 +122,40 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
   const [anteprima, setAnteprima] = useState(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [reading, setReading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [ocrMsg, setOcrMsg] = useState('')
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }))
 
   function scegliFoto(file) {
     setFoto(file ?? null)
     setAnteprima(file ? URL.createObjectURL(file) : null)
+    setOcrMsg('')
+  }
+
+  async function leggiFoto() {
+    if (!foto) return
+    setReading(true)
+    setProgress(0)
+    setOcrMsg('')
+    try {
+      const text = await readImageText(foto, setProgress)
+      const got = parseBiaText(text)
+      setF((p) => ({
+        ...p,
+        weight: got.weight ?? p.weight,
+        fat_pct: got.fat_pct ?? p.fat_pct,
+        lean_mass: got.lean_mass ?? p.lean_mass,
+        phase_angle: got.phase_angle ?? p.phase_angle,
+      }))
+      const n = ['weight', 'fat_pct', 'lean_mass', 'phase_angle'].filter((k) => got[k] != null).length
+      setOcrMsg(
+        n ? `✅ Letti ${n}/4 valori — controlla e correggi qui sotto.` : '⚠️ Non sono riuscito a leggere i numeri: inseriscili a mano.'
+      )
+    } catch (e) {
+      setOcrMsg('Lettura non riuscita: ' + (e.message ?? String(e)))
+    }
+    setReading(false)
   }
 
   async function save() {
@@ -177,8 +207,14 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
           onChange={(e) => scegliFoto(e.target.files?.[0])}
         />
         {anteprima && <img className="biafoto-preview" src={anteprima} alt="anteprima BIA" />}
+        {foto && (
+          <button className="btn-primary sm" style={{ marginTop: 10 }} onClick={leggiFoto} disabled={reading}>
+            {reading ? `Leggo… ${progress}%` : '🔎 Leggi i numeri dalla foto'}
+          </button>
+        )}
+        {ocrMsg && <p className="muted small" style={{ marginTop: 8 }}>{ocrMsg}</p>}
         <p className="muted small">
-          Allega la foto e compila solo i 4 essenziali qui sotto: tutto il resto resta leggibile nella foto.
+          Allega la foto: puoi provare la lettura automatica (poi controlla), oppure compilare i 4 essenziali a mano.
         </p>
       </div>
 
