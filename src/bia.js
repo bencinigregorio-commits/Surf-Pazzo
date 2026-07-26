@@ -14,7 +14,7 @@ export const ESSENTIALS = [
   { key: 'weight', label: 'Peso', unit: 'kg' },
   { key: 'fat_pct', label: '% grasso', unit: '%' },
   { key: 'lean_mass', label: 'Massa magra', unit: 'kg' },
-  { key: 'phase_angle', label: 'Angolo di fase', unit: '°' },
+  { key: 'smm', label: 'Massa muscolare', unit: 'kg' },
 ]
 
 // Dalla più recente. A parità di data, conta l'ora di inserimento.

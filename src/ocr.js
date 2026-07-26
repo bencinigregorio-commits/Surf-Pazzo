@@ -60,6 +60,8 @@ export function parseBiaText(text) {
       findNear(t, ['lean body', 'massa magra', 'fat free', 'fat-free', 'ffm'], leanRange) ??
       findNear(t, ['lean'], leanRange),
     phase_angle: findNear(t, ['phase angle', 'angolo di fase', 'fase'], { min: 3, max: 12, decimals: true }),
+    // Massa muscolare scheletrica (Skeletal Muscle Mass)
+    smm: findNear(t, ['skeletal muscle', 'muscolo scheletr', 'massa muscolare', 'smm'], { min: 15, max: 70 }),
     // Bonus disponibili sull'Evolt 360 (e su molti device):
     fat_mass: findNear(t, ['body fat mass', 'massa grassa'], { min: 2, max: 80 }),
     tbw: findNear(t, ['total body water', 'acqua total'], { min: 20, max: 90 }),

@@ -146,13 +146,14 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
         weight: got.weight ?? p.weight,
         fat_pct: got.fat_pct ?? p.fat_pct,
         lean_mass: got.lean_mass ?? p.lean_mass,
+        smm: got.smm ?? p.smm,
         phase_angle: got.phase_angle ?? p.phase_angle,
         fat_mass: got.fat_mass ?? p.fat_mass,
         tbw: got.tbw ?? p.tbw,
         bmr: got.bmr ?? p.bmr,
         visceral: got.visceral ?? p.visceral,
       }))
-      const n = ['weight', 'fat_pct', 'lean_mass', 'phase_angle'].filter((k) => got[k] != null).length
+      const n = ['weight', 'fat_pct', 'lean_mass', 'smm'].filter((k) => got[k] != null).length
       setOcrMsg(
         n ? `✅ Letti ${n}/4 valori — controlla e correggi qui sotto.` : '⚠️ Non sono riuscito a leggere i numeri: inseriscili a mano.'
       )
@@ -179,6 +180,7 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
       weight: num(f.weight),
       fat_pct: num(f.fat_pct),
       lean_mass: num(f.lean_mass),
+      smm: num(f.smm),
       phase_angle: num(f.phase_angle),
       fat_mass: num(f.fat_mass),
       tbw: num(f.tbw),
@@ -233,7 +235,7 @@ function AddScanForm({ scans, onAddScan, sinceLast }) {
         <Field label="Peso (kg)" type="number" value={f.weight} onChange={(v) => set('weight', v)} />
         <Field label="% grasso" type="number" value={f.fat_pct} onChange={(v) => set('fat_pct', v)} />
         <Field label="Massa magra (kg)" type="number" value={f.lean_mass} onChange={(v) => set('lean_mass', v)} />
-        <Field label="Angolo di fase (°)" type="number" value={f.phase_angle} onChange={(v) => set('phase_angle', v)} />
+        <Field label="Massa muscolare (kg)" type="number" value={f.smm} onChange={(v) => set('smm', v)} />
       </div>
 
       <details className="bia-more">
